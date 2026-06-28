@@ -1,0 +1,14 @@
+[
+  {
+    "tool": "firewall_state",
+    "summary": "bogons6 table contains a multicast prefix",
+    "direct_measurement": true,
+    "payload": {"host": "core-router-1", "table": "bogons6", "entries": 42}
+  },
+  {
+    "tool": "ndp_state",
+    "summary": "no NDP neighbor for upstream gateway",
+    "direct_measurement": true,
+    "payload": {"host": "core-router-1", "iface": "wan0", "neighbors": 0}
+  }
+]

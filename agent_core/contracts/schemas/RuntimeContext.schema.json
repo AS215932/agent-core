@@ -1,0 +1,42 @@
+{
+  "additionalProperties": false,
+  "description": "Environment-level runtime dependencies/config (not per-run).",
+  "properties": {
+    "config": {
+      "additionalProperties": true,
+      "title": "Config",
+      "type": "object"
+    },
+    "deployment_slot": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Deployment Slot"
+    },
+    "environment": {
+      "default": "dev",
+      "title": "Environment",
+      "type": "string"
+    },
+    "feature_flags": {
+      "additionalProperties": {
+        "type": "boolean"
+      },
+      "title": "Feature Flags",
+      "type": "object"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "title": "RuntimeContext",
+  "type": "object"
+}

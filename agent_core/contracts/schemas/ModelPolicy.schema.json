@@ -1,0 +1,68 @@
+{
+  "additionalProperties": false,
+  "description": "Provider-agnostic model selection policy (draft).\n\nSuperset of engineering-loop ``model-policy.yml`` (role x tier + risk/retry\nescalation) and NOC's ``FallbackModel`` chain.",
+  "properties": {
+    "allowed_providers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Allowed Providers",
+      "type": "array"
+    },
+    "fallback": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Fallback",
+      "type": "array"
+    },
+    "objective_weights": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Objective Weights",
+      "type": "object"
+    },
+    "policy_ref": {
+      "title": "Policy Ref",
+      "type": "string"
+    },
+    "retry_escalation": {
+      "additionalProperties": true,
+      "title": "Retry Escalation",
+      "type": "object"
+    },
+    "risk_overrides": {
+      "additionalProperties": true,
+      "title": "Risk Overrides",
+      "type": "object"
+    },
+    "role": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Role"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "tiers": {
+      "additionalProperties": true,
+      "title": "Tiers",
+      "type": "object"
+    }
+  },
+  "required": [
+    "policy_ref"
+  ],
+  "title": "ModelPolicy",
+  "type": "object"
+}

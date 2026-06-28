@@ -1,0 +1,29 @@
+# DESCRIPTIVE draft GraphSpec of the knowledge loop's retrieval/enrichment pipeline.
+# knowledge is a service (CLI + MCP server), not a LangGraph graph; this models the
+# logical context-pack retrieval path. Source: knowledge/src/hyrule_knowledge/*.
+schema_version: "0.1.0"
+graph_id: knowledge
+version_name: draft-logical-pipeline
+description: >-
+  Governed retrieval + enrichment: ingest -> retrieve (exact/graph/FTS) ->
+  policy gate (A0-A5, deny-by-default) -> context-pack assembly -> finalize;
+  enrichment + export are side paths.
+owner: AS215932/knowledge
+entrypoint: retrieve
+nodes:
+  - {id: ingest, kind: system_node}
+  - {id: retrieve, kind: retriever, config: {cascade: [exact, graph, fts]}}
+  - {id: policy_gate, kind: policy, policy_ref: knowledge-policy.yml}
+  - {id: context_pack, kind: synthesizer, output_contract: schema/context-pack.schema.json}
+  - {id: enrich, kind: agent, agent_ref: enrich, model_policy_ref: openrouter:claude-sonnet-4-6}
+  - {id: export, kind: system_node}
+  - {id: finalize, kind: finalizer}
+edges:
+  - {id: e_ingest_export, source: ingest, target: export, mode: normal}
+  - {id: e_retrieve_policy, source: retrieve, target: policy_gate, mode: normal}
+  - {id: e_policy_context, source: policy_gate, target: context_pack, mode: conditional}
+  - {id: e_context_finalize, source: context_pack, target: finalize, mode: normal}
+  - {id: e_finalize_end, source: finalize, target: END, mode: terminal}
+risk_policy:
+  authority_model: [A0, A1, A2, A3, A4, A5]
+  default: deny

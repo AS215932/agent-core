@@ -1,0 +1,59 @@
+# DESCRIPTIVE draft GraphSpec of the engineering-loop's CURRENT LangGraph topology.
+# Source of truth: engineering-loop/src/hyrule_engineering_loop/graph.py (build_graph).
+# Descriptive only — there is no compiler in this milestone.
+schema_version: "0.1.0"
+graph_id: engineering-loop
+version_name: draft-from-graph.py
+description: >-
+  20-node engineering loop: classification -> planner -> 6 role reviewers ->
+  repo adapter/worktree -> gates -> policy -> role judgment ->
+  promotion|package_pr -> human signoff -> reflection.
+owner: AS215932/engineering-loop
+entrypoint: classification
+state_schema: hyrule_engineering_loop.state.GraphState
+nodes:
+  - {id: classification, kind: system_node}
+  - {id: planner, kind: agent, agent_ref: planner}
+  - {id: network_architect, kind: agent, agent_ref: network_architect, model_policy_ref: model-policy.yml#network_architect, risk_tier: high}
+  - {id: systems_engineer, kind: agent, agent_ref: systems_engineer, model_policy_ref: model-policy.yml#systems_engineer}
+  - {id: devops_netops, kind: agent, agent_ref: devops_netops, model_policy_ref: model-policy.yml#devops_netops}
+  - {id: security_auditor, kind: agent, agent_ref: security_auditor, model_policy_ref: model-policy.yml#security_auditor, risk_tier: high}
+  - {id: finops_integrity, kind: agent, agent_ref: finops_integrity, model_policy_ref: model-policy.yml#finops_integrity}
+  - {id: virtual_lab_chaos, kind: agent, agent_ref: virtual_lab_chaos, model_policy_ref: model-policy.yml#virtual_lab_chaos}
+  - {id: repo_adapter, kind: system_node}
+  - {id: worktree_setup, kind: system_node}
+  - {id: pre_gate_policy, kind: policy, policy_ref: policy.py}
+  - {id: delegate_implementation, kind: tool_executor}
+  - {id: gate_execution, kind: tool_executor}
+  - {id: workspace_cleanup, kind: system_node}
+  - {id: policy, kind: policy, policy_ref: policy.py}
+  - {id: role_judgment, kind: judge, judge_ref: judgment.py}
+  - {id: promotion, kind: tool_executor, risk_tier: high}
+  - {id: package_pr, kind: tool_executor}
+  - {id: human_signoff, kind: human_approval}
+  - {id: reflection, kind: finalizer}
+edges:
+  - {id: e_start, source: classification, target: planner, mode: normal}
+  - {id: e_plan_fanout, source: planner, target: network_architect, mode: conditional, candidates: [network_architect, systems_engineer, devops_netops, security_auditor, finops_integrity, virtual_lab_chaos]}
+  - {id: e_na_join, source: network_architect, target: repo_adapter, mode: normal}
+  - {id: e_se_join, source: systems_engineer, target: repo_adapter, mode: normal}
+  - {id: e_dn_join, source: devops_netops, target: repo_adapter, mode: normal}
+  - {id: e_sa_join, source: security_auditor, target: repo_adapter, mode: normal}
+  - {id: e_fi_join, source: finops_integrity, target: repo_adapter, mode: normal}
+  - {id: e_vlc_join, source: virtual_lab_chaos, target: repo_adapter, mode: normal}
+  - {id: e_repo_wt, source: repo_adapter, target: worktree_setup, mode: conditional}
+  - {id: e_wt_pregate, source: worktree_setup, target: pre_gate_policy, mode: conditional}
+  - {id: e_pregate_delegate, source: pre_gate_policy, target: delegate_implementation, mode: conditional}
+  - {id: e_delegate_gate, source: delegate_implementation, target: gate_execution, mode: conditional}
+  - {id: e_gate_cleanup, source: gate_execution, target: workspace_cleanup, mode: normal}
+  - {id: e_cleanup_policy, source: workspace_cleanup, target: policy, mode: conditional}
+  - {id: e_policy_judgment, source: policy, target: role_judgment, mode: conditional}
+  - {id: e_judgment_promotion, source: role_judgment, target: promotion, mode: conditional, candidates: [promotion, package_pr]}
+  - {id: e_promotion_signoff, source: promotion, target: human_signoff, mode: approval}
+  - {id: e_package_reflection, source: package_pr, target: reflection, mode: normal}
+  - {id: e_signoff_reflection, source: human_signoff, target: reflection, mode: normal}
+  - {id: e_reflection_end, source: reflection, target: END, mode: terminal}
+risk_policy:
+  human_signoff_required_for: [promotion, prod_change]
+deployment:
+  default_backend: mock

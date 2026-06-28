@@ -1,0 +1,46 @@
+# DESCRIPTIVE draft GraphSpec of the NOC agent's CURRENT LangGraph topology.
+# Source of truth: hyrule-noc-agent/app/graph/graph.py + app/graph/nodes.py.
+# Descriptive only — no compiler in this milestone.
+schema_version: "0.1.0"
+graph_id: noc-agent
+version_name: draft-from-graph.py
+description: >-
+  13-node NOC investigation graph: correlate/dedupe -> recall history ->
+  supervisor route -> {bgp|firewall|infrastructure} specialist ->
+  evidence validation -> golden-state drift -> proposal -> approval interrupt ->
+  execute remediation -> verify.
+owner: AS215932/noc-agent
+entrypoint: correlate_and_dedupe
+state_schema: app.graph.state.WorkflowState
+nodes:
+  - {id: correlate_and_dedupe, kind: system_node}
+  - {id: recall_history, kind: memory, memory_namespaces: [cases, traces]}
+  - {id: supervisor_route, kind: system_node}
+  - {id: bgp_specialist, kind: agent, agent_ref: bgp_specialist, mcp_bindings: [hyrule-mcp]}
+  - {id: firewall_specialist, kind: agent, agent_ref: firewall_specialist, mcp_bindings: [hyrule-mcp]}
+  - {id: infrastructure_specialist, kind: agent, agent_ref: infrastructure_specialist, mcp_bindings: [hyrule-mcp]}
+  - {id: evidence_validation, kind: policy}
+  - {id: golden_state_drift_check, kind: policy}
+  - {id: proposal_build, kind: synthesizer}
+  - {id: prepare_approval, kind: system_node}
+  - {id: approval_interrupt, kind: human_approval}
+  - {id: execute_approved_remediation, kind: tool_executor, risk_tier: critical, mcp_bindings: [hyrule-mcp]}
+  - {id: verify_remediation, kind: finalizer}
+edges:
+  - {id: e_corr_recall, source: correlate_and_dedupe, target: recall_history, mode: normal}
+  - {id: e_recall_route, source: recall_history, target: supervisor_route, mode: normal}
+  - {id: e_route_specialists, source: supervisor_route, target: bgp_specialist, mode: conditional, candidates: [bgp_specialist, firewall_specialist, infrastructure_specialist]}
+  - {id: e_bgp_validate, source: bgp_specialist, target: evidence_validation, mode: normal}
+  - {id: e_fw_validate, source: firewall_specialist, target: evidence_validation, mode: normal}
+  - {id: e_infra_validate, source: infrastructure_specialist, target: evidence_validation, mode: normal}
+  - {id: e_validate_drift, source: evidence_validation, target: golden_state_drift_check, mode: normal}
+  - {id: e_drift_proposal, source: golden_state_drift_check, target: proposal_build, mode: normal}
+  - {id: e_proposal_prepare, source: proposal_build, target: prepare_approval, mode: normal}
+  - {id: e_prepare_interrupt, source: prepare_approval, target: approval_interrupt, mode: interrupt}
+  - {id: e_interrupt_execute, source: approval_interrupt, target: execute_approved_remediation, mode: approval, candidates: [execute_approved_remediation, END]}
+  - {id: e_interrupt_end, source: approval_interrupt, target: END, mode: conditional}
+  - {id: e_execute_verify, source: execute_approved_remediation, target: verify_remediation, mode: normal}
+  - {id: e_verify_end, source: verify_remediation, target: END, mode: terminal}
+risk_policy:
+  approval_required_for: [execute_approved_remediation]
+  invariant: no-false-all-clear  # resolve never from absence (#31)

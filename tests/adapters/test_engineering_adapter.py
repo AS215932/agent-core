@@ -1,0 +1,36 @@
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import Any
+
+from agent_core.adapters import engineering_loop as eng
+
+
+def test_task_envelope(load_fixture: Callable[[str], Any]) -> None:
+    state = load_fixture("graph_state.sample.json")
+    env = eng.task_envelope_from_graph_state(state)
+    assert env.task_id == "chg-2026-0628-001"
+    assert env.source == "engineering-loop"
+    assert env.risk_level == "high"
+    assert env.graph_id == "engineering-loop"
+
+
+def test_decision(load_fixture: Callable[[str], Any]) -> None:
+    review = load_fixture("role_review.sample.json")
+    decision = eng.decision_from_role_review("security_auditor", review)
+    assert decision.approved is False
+    assert decision.decision == "reject"
+    assert len(decision.proposed_actions) == 2
+    assert decision.agent_role == "security_auditor"
+
+
+def test_trace_events(load_fixture: Callable[[str], Any]) -> None:
+    trace = load_fixture("loop_trace.sample.json")
+    events = eng.trace_events_from_loop_trace(trace, run_id="run-1")
+    types = [e.event_type for e in events]
+    assert "model_call" in types
+    assert "backend_execution" in types
+    backend = next(e for e in events if e.event_type == "backend_execution")
+    assert backend.cost is not None
+    assert backend.cost.input_tokens == 1820
+    assert all(e.run_id == "run-1" for e in events)

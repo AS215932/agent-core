@@ -1,0 +1,198 @@
+{
+  "additionalProperties": false,
+  "description": "Raw feedback on an answer/run/node/model.\n\nFirst source: NOC ``operator_feedback`` (recorded today, unused downstream) and\nengineering-loop curated-lesson proposals. Normalizes later into RewardSignal.",
+  "properties": {
+    "actor_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Actor Id"
+    },
+    "actor_role": {
+      "default": "operator",
+      "enum": [
+        "end_user",
+        "operator",
+        "senior",
+        "system"
+      ],
+      "title": "Actor Role",
+      "type": "string"
+    },
+    "agent_role": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Agent Role"
+    },
+    "categories": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Categories",
+      "type": "array"
+    },
+    "correction_text": {
+      "default": "",
+      "title": "Correction Text",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "environment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Environment"
+    },
+    "feedback_id": {
+      "title": "Feedback Id",
+      "type": "string"
+    },
+    "graph_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Graph Id"
+    },
+    "graph_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Graph Version"
+    },
+    "node_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Node Id"
+    },
+    "promote_to_eval": {
+      "default": false,
+      "title": "Promote To Eval",
+      "type": "boolean"
+    },
+    "promote_to_judge_alignment": {
+      "default": false,
+      "title": "Promote To Judge Alignment",
+      "type": "boolean"
+    },
+    "promote_to_memory": {
+      "default": false,
+      "title": "Promote To Memory",
+      "type": "boolean"
+    },
+    "rationale": {
+      "default": "",
+      "title": "Rationale",
+      "type": "string"
+    },
+    "run_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Run Id"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "score": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Score"
+    },
+    "signal_type": {
+      "default": "good",
+      "title": "Signal Type",
+      "type": "string"
+    },
+    "target_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Id"
+    },
+    "target_type": {
+      "default": "answer",
+      "title": "Target Type",
+      "type": "string"
+    },
+    "trace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trace Id"
+    }
+  },
+  "required": [
+    "feedback_id"
+  ],
+  "title": "FeedbackEvent",
+  "type": "object"
+}

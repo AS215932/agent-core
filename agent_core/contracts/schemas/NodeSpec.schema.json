@@ -1,0 +1,202 @@
+{
+  "additionalProperties": false,
+  "description": "Declarative node spec.",
+  "properties": {
+    "agent_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Agent Ref"
+    },
+    "config": {
+      "additionalProperties": true,
+      "title": "Config",
+      "type": "object"
+    },
+    "enabled": {
+      "default": true,
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "implementation": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Implementation"
+    },
+    "input_contract": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Input Contract"
+    },
+    "judge_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Judge Ref"
+    },
+    "kind": {
+      "enum": [
+        "agent",
+        "judge",
+        "tool_executor",
+        "mcp",
+        "retriever",
+        "memory",
+        "policy",
+        "human_approval",
+        "subgraph",
+        "parallel_council",
+        "synthesizer",
+        "system_node",
+        "finalizer"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "mcp_bindings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Mcp Bindings",
+      "type": "array"
+    },
+    "memory_namespaces": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Memory Namespaces",
+      "type": "array"
+    },
+    "model_policy_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Policy Ref"
+    },
+    "output_contract": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Output Contract"
+    },
+    "policy_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Policy Ref"
+    },
+    "retry_policy": {
+      "additionalProperties": true,
+      "title": "Retry Policy",
+      "type": "object"
+    },
+    "risk_tier": {
+      "anyOf": [
+        {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Risk Tier"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "subgraph_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Subgraph Ref"
+    },
+    "timeout_seconds": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Timeout Seconds"
+    },
+    "tool_bindings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Tool Bindings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "kind"
+  ],
+  "title": "NodeSpec",
+  "type": "object"
+}
