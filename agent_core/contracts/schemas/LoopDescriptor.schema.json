@@ -1,0 +1,168 @@
+{
+  "$defs": {
+    "ObservatoryLink": {
+      "additionalProperties": false,
+      "description": "Bounded link/reference from an observatory DTO to its source artifact.",
+      "properties": {
+        "kind": {
+          "default": "other",
+          "enum": [
+            "case",
+            "handoff",
+            "run",
+            "trace",
+            "github_pr",
+            "github_issue",
+            "workflow_run",
+            "deploy",
+            "knowledge",
+            "verification",
+            "external",
+            "other"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "default": "",
+          "title": "Label",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": true,
+          "title": "Metadata",
+          "type": "object"
+        },
+        "ref_id": {
+          "default": "",
+          "title": "Ref Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "default": "0.1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "url": {
+          "default": "",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "title": "ObservatoryLink",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Static-ish descriptor for one agentic loop or future loop placeholder.",
+  "properties": {
+    "capabilities": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Capabilities",
+      "type": "array"
+    },
+    "description": {
+      "default": "",
+      "title": "Description",
+      "type": "string"
+    },
+    "display_name": {
+      "title": "Display Name",
+      "type": "string"
+    },
+    "environment": {
+      "default": "production",
+      "title": "Environment",
+      "type": "string"
+    },
+    "host": {
+      "default": "",
+      "title": "Host",
+      "type": "string"
+    },
+    "input_channels": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Input Channels",
+      "type": "array"
+    },
+    "kind": {
+      "default": "other",
+      "enum": [
+        "engineering",
+        "noc",
+        "knowledge",
+        "soc",
+        "collector",
+        "observability",
+        "other"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "links": {
+      "items": {
+        "$ref": "#/$defs/ObservatoryLink"
+      },
+      "title": "Links",
+      "type": "array"
+    },
+    "loop_id": {
+      "title": "Loop Id",
+      "type": "string"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    },
+    "output_channels": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Output Channels",
+      "type": "array"
+    },
+    "owner": {
+      "default": "",
+      "title": "Owner",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "service_name": {
+      "default": "",
+      "title": "Service Name",
+      "type": "string"
+    },
+    "status": {
+      "default": "unknown",
+      "enum": [
+        "active",
+        "idle",
+        "degraded",
+        "disabled",
+        "unknown"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "trace_graph_id": {
+      "default": "",
+      "title": "Trace Graph Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "loop_id",
+    "display_name"
+  ],
+  "title": "LoopDescriptor",
+  "type": "object"
+}

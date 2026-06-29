@@ -1,0 +1,46 @@
+{
+  "additionalProperties": false,
+  "description": "Human, loop, service, or system actor shown in audit/timeline UI.",
+  "properties": {
+    "actor_id": {
+      "default": "",
+      "title": "Actor Id",
+      "type": "string"
+    },
+    "actor_type": {
+      "default": "unknown",
+      "enum": [
+        "operator",
+        "loop",
+        "service",
+        "system",
+        "external",
+        "unknown"
+      ],
+      "title": "Actor Type",
+      "type": "string"
+    },
+    "display_name": {
+      "default": "",
+      "title": "Display Name",
+      "type": "string"
+    },
+    "loop_id": {
+      "default": "",
+      "title": "Loop Id",
+      "type": "string"
+    },
+    "role": {
+      "default": "",
+      "title": "Role",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "title": "ActorRef",
+  "type": "object"
+}
