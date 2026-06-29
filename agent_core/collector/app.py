@@ -8,10 +8,11 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
-from fastapi import FastAPI
-from sqlalchemy import select
+from fastapi import FastAPI, HTTPException
+from sqlalchemy import select, text
 
 from agent_core.collector.db import (
     TraceEventRow,
@@ -21,6 +22,15 @@ from agent_core.collector.db import (
 )
 from agent_core.contracts._base import utcnow
 from agent_core.contracts.tracing import TraceEvent
+
+
+def _package_version() -> str:
+    try:
+        return version("agent-core")
+    except PackageNotFoundError:
+        from agent_core import __version__
+
+        return __version__
 
 
 def _row_from_event(event: TraceEvent) -> TraceEventRow:
@@ -57,10 +67,16 @@ def create_app(database_url: str | None = None) -> FastAPI:
         yield
         await engine.dispose()
 
-    app = FastAPI(title="agent-core trace collector", version="0.2.0", lifespan=lifespan)
+    app = FastAPI(title="agent-core trace collector", version=_package_version(), lifespan=lifespan)
+    app.state.collector_sessionmaker = sessionmaker
 
     @app.get("/healthz")
     async def healthz() -> dict[str, str]:
+        try:
+            async with app.state.collector_sessionmaker() as session:
+                await session.execute(text("SELECT 1"))
+        except Exception as exc:
+            raise HTTPException(status_code=503, detail="database unavailable") from exc
         return {"status": "ok"}
 
     @app.post("/v1/trace")

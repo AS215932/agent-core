@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from types import TracebackType
+
 from fastapi.testclient import TestClient
 
 from agent_core.collector.app import create_app
@@ -12,6 +14,27 @@ def _app(tmp_path):
 def test_healthz(tmp_path) -> None:
     with TestClient(_app(tmp_path)) as client:
         assert client.get("/healthz").json() == {"status": "ok"}
+
+
+def test_healthz_checks_database_connectivity(tmp_path) -> None:
+    class BrokenSession:
+        async def __aenter__(self) -> BrokenSession:
+            raise RuntimeError("database down")
+
+        async def __aexit__(
+            self,
+            exc_type: type[BaseException] | None,
+            exc: BaseException | None,
+            tb: TracebackType | None,
+        ) -> None:
+            return None
+
+    app = _app(tmp_path)
+    app.state.collector_sessionmaker = lambda: BrokenSession()
+    with TestClient(app) as client:
+        response = client.get("/healthz")
+        assert response.status_code == 503
+        assert response.json() == {"detail": "database unavailable"}
 
 
 def test_ingest_and_read(tmp_path) -> None:
