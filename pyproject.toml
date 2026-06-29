@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agent-core"
-version = "0.1.0"
+version = "0.2.0"
 description = "Shared typed contracts for the AS215932 Agent Runtime Framework (Phase 1 / §31 safe milestone)."
 requires-python = ">=3.11"
 dependencies = ["pydantic>=2,<3"]
