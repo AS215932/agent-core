@@ -10,6 +10,7 @@ from pydantic import Field
 
 from agent_core.contracts._base import TraceableModel, VersionedModel, utcnow
 from agent_core.contracts.models import CostUsage
+from agent_core.contracts.observatory import ObservatoryLink
 
 
 def _event_id() -> str:
@@ -29,6 +30,20 @@ class TraceEvent(TraceableModel):
     payload: dict[str, Any] = Field(default_factory=dict)
     cost: CostUsage | None = None
     timestamp: datetime = Field(default_factory=utcnow)
+
+    # Optional observatory correlation fields. They are intentionally nullable so
+    # existing producers remain backward-compatible while richer emitters can tie
+    # a trace event to CaseService/LHP state, GitHub artifacts, and deploy runs.
+    case_id: str | None = None
+    handoff_id: str | None = None
+    objective_id: str | None = None
+    change_id: str | None = None
+    repository: str | None = None
+    pr_number: int | None = Field(default=None, ge=1)
+    commit_sha: str | None = None
+    workflow_run_id: str | None = None
+    parent_event_id: str | None = None
+    links: list[ObservatoryLink] = Field(default_factory=list)
 
 
 class AuditEvent(VersionedModel):
