@@ -1,0 +1,32 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Build sdist + wheel
+        run: ~/.local/bin/uv build
+      - name: Verify version matches tag
+        run: |
+          test -f "dist/agent_core-${GITHUB_REF_NAME#v}-py3-none-any.whl" \
+            || (echo "wheel version does not match tag ${GITHUB_REF_NAME}" && ls dist && exit 1)
+      - name: Publish GitHub Release with artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" dist/* \
+            --title "agent-core ${GITHUB_REF_NAME}" \
+            --notes "Built from ${GITHUB_SHA}. Install: see docs/distribution.md."
