@@ -1,0 +1,48 @@
+{
+  "additionalProperties": false,
+  "description": "Time window used by deterministic before/after analysis.",
+  "properties": {
+    "ends_at": {
+      "format": "date-time",
+      "title": "Ends At",
+      "type": "string"
+    },
+    "label": {
+      "default": "custom",
+      "enum": [
+        "baseline",
+        "observation",
+        "custom"
+      ],
+      "title": "Label",
+      "type": "string"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    },
+    "sample_size": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Sample Size",
+      "type": "integer"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "starts_at": {
+      "format": "date-time",
+      "title": "Starts At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "starts_at",
+    "ends_at"
+  ],
+  "title": "ImpactWindow",
+  "type": "object"
+}

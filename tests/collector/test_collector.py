@@ -68,3 +68,75 @@ def test_batch(tmp_path) -> None:
     with TestClient(_app(tmp_path)) as client:
         assert client.post("/v1/trace/batch", json=events).json() == {"stored": 2}
         assert len(client.get("/v1/trace", params={"run_id": "r2"}).json()) == 2
+
+
+def test_observatory_query_apis(tmp_path) -> None:
+    events = [
+        {
+            "event_type": "model_call",
+            "summary": "planner produced a task spec",
+            "run_id": "run-observatory-1",
+            "graph_id": "engineering-loop",
+            "agent_role": "planner",
+            "case_id": "case_123",
+            "handoff_id": "handoff_123",
+            "change_id": "AS215932/agent-core#10",
+            "repository": "AS215932/agent-core",
+            "pr_number": 10,
+            "links": [
+                {
+                    "kind": "github_pr",
+                    "label": "agent-core#10",
+                    "url": "https://github.com/AS215932/agent-core/pull/10",
+                    "ref_id": "10",
+                }
+            ],
+            "cost": {"usd": 0.01, "input_tokens": 3, "output_tokens": 4},
+        },
+        {
+            "event_type": "tool_call",
+            "summary": "pytest",
+            "run_id": "run-observatory-1",
+            "graph_id": "engineering-loop",
+            "payload": {"status": "passed"},
+            "case_id": "case_123",
+            "change_id": "AS215932/agent-core#10",
+        },
+        {
+            "event_type": "knowledge_context_pack",
+            "summary": "context pack",
+            "run_id": "run-knowledge-1",
+            "graph_id": "knowledge",
+        },
+    ]
+    with TestClient(_app(tmp_path)) as client:
+        assert client.post("/v1/trace/batch", json=events).json() == {"stored": 3}
+
+        loops = client.get("/v1/loops").json()
+        assert {loop["loop_id"] for loop in loops} == {"engineering-loop", "knowledge"}
+
+        runs = client.get("/v1/runs").json()
+        assert {run["run_id"] for run in runs} == {"run-observatory-1", "run-knowledge-1"}
+
+        detail = client.get("/v1/runs/run-observatory-1").json()
+        assert detail["event_count"] == 2
+        assert detail["case_ids"] == ["case_123"]
+        assert detail["change_ids"] == ["AS215932/agent-core#10"]
+        assert detail["cost_usd"] == 0.01
+
+        timeline = client.get("/v1/runs/run-observatory-1/events").json()
+        assert [item["title"] for item in timeline] == ["model_call", "tool_call"]
+        assert timeline[0]["links"][0]["kind"] == "github_pr"
+
+        actions = client.get("/v1/actions", params={"case_id": "case_123"}).json()
+        assert len(actions) == 2
+        assert {item["case_id"] for item in actions} == {"case_123"}
+
+        topology = client.get("/v1/topology").json()
+        assert "agent-core-collector" in {node["node_id"] for node in topology["nodes"]}
+        assert {edge["kind"] for edge in topology["edges"]} == {"emits_trace"}
+
+        metrics = client.get("/v1/metrics/daily").json()
+        assert metrics[0]["event_count"] == 3
+        assert metrics[0]["run_count"] == 2
+        assert metrics[0]["graph_counts"]["engineering-loop"] == 2
