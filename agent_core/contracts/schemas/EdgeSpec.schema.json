@@ -1,0 +1,131 @@
+{
+  "additionalProperties": false,
+  "description": "Declarative edge spec.",
+  "properties": {
+    "candidates": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Candidates",
+      "type": "array"
+    },
+    "condition": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Condition"
+    },
+    "enabled": {
+      "default": true,
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "guardrails": {
+      "additionalProperties": true,
+      "title": "Guardrails",
+      "type": "object"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "max_attempts": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Max Attempts"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    },
+    "mode": {
+      "default": "normal",
+      "enum": [
+        "normal",
+        "conditional",
+        "parallel",
+        "fallback",
+        "retry",
+        "approval",
+        "interrupt",
+        "terminal"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "router_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Router Ref"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source": {
+      "title": "Source",
+      "type": "string"
+    },
+    "target": {
+      "title": "Target",
+      "type": "string"
+    },
+    "timeout_seconds": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Timeout Seconds"
+    },
+    "weight": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Weight"
+    }
+  },
+  "required": [
+    "id",
+    "source",
+    "target"
+  ],
+  "title": "EdgeSpec",
+  "type": "object"
+}

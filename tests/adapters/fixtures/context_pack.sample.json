@@ -1,0 +1,23 @@
+{
+  "id": "ctx_0123456789abcdef0123456789abcdef",
+  "task_id": "know_abc12345",
+  "role": "engineering_loop",
+  "generated_at": "2026-06-28T18:00:00+00:00",
+  "knowledge_snapshot": "2026-06-28-export-001",
+  "retrieval_version": "r3",
+  "policy_version": "p2",
+  "token_budget": 6000,
+  "max_chars": 24000,
+  "risk_level": "low",
+  "task": {"text": "vault-agent token templating cadence"},
+  "sections": [
+    {"name": "authoritative_source", "body": "vault_agent role manages env templating.", "refs": ["okf:vault-agent"]}
+  ],
+  "included_refs": [
+    {"ref": "okf:vault-agent", "authority": "A1", "kind": "concept", "review_status": "reviewed"},
+    {"ref": "network-operations:ansible/roles/vault_agent/tasks/main.yml", "authority": "A0", "kind": "source", "commit_sha": "deadbeef"}
+  ],
+  "excluded_refs": [],
+  "policy_decision": {"decision": "allow", "role": "engineering_loop"},
+  "unresolved_questions": ["Is the restart handler idempotent?"]
+}

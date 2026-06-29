@@ -1,0 +1,26 @@
+{
+  "llm_outputs": [
+    {
+      "role": "security_auditor",
+      "approved": false,
+      "proposed_mutation_paths": ["ansible/roles/vault_agent/tasks/main.yml"],
+      "source_files": ["ansible/roles/vault_agent/tasks/main.yml"],
+      "model_selection": {"provider": "anthropic", "model": "claude-sonnet-4-6", "tier": "strong"}
+    }
+  ],
+  "gate_results": [
+    {"command": ["python", "-m", "compileall", "ansible"], "status": "passed", "returncode": 0},
+    {"command": ["ansible-lint"], "status": "failed", "returncode": 2}
+  ],
+  "backend_results": [
+    {
+      "repo": "network-operations",
+      "backend": "mock",
+      "status": "completed",
+      "iterations": 1,
+      "wall_clock_seconds": 12.4,
+      "cost": {"input_tokens": 1820, "output_tokens": 540, "usd": 0.0},
+      "changed_paths": ["ansible/roles/vault_agent/tasks/main.yml"]
+    }
+  ]
+}

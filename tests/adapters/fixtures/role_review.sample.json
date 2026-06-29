@@ -1,0 +1,11 @@
+{
+  "approved": false,
+  "validation_errors": [
+    {"path": "ansible/roles/vault_agent/tasks/main.yml", "error": "missing restart handler notify"}
+  ],
+  "proposed_mutations": [
+    {"path": "ansible/roles/vault_agent/tasks/main.yml", "content": "# ... updated ...", "operation": "replace"},
+    {"path": "ansible/roles/vault_agent/handlers/main.yml", "content": "# ... new handler ...", "operation": "create"}
+  ],
+  "notes": "Needs a restart handler before approving."
+}

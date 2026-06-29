@@ -1,0 +1,8 @@
+{
+  "change_id": "chg-2026-0628-001",
+  "change_class": "infra_ansible",
+  "risk_level": "high",
+  "customer_impact": "possible",
+  "source_of_truth_files": ["ansible/roles/vault_agent/tasks/main.yml"],
+  "feature_request": "Tune vault-agent token templating cadence"
+}

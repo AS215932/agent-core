@@ -1,0 +1,7 @@
+{
+  "incident_id": "inc-2026-0628-bgp-07",
+  "decision": "approved",
+  "operator": "operator-1",
+  "comment": "Confirmed in lab; proceed with firewall reload.",
+  "decided_at": "2026-06-28T18:30:00+00:00"
+}

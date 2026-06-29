@@ -1,0 +1,139 @@
+{
+  "additionalProperties": false,
+  "description": "Structured safety/approval gate decision.",
+  "properties": {
+    "agent_role": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Agent Role"
+    },
+    "allow": {
+      "title": "Allow",
+      "type": "boolean"
+    },
+    "audit": {
+      "additionalProperties": true,
+      "title": "Audit",
+      "type": "object"
+    },
+    "environment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Environment"
+    },
+    "graph_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Graph Id"
+    },
+    "graph_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Graph Version"
+    },
+    "node_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Node Id"
+    },
+    "reason": {
+      "default": "",
+      "title": "Reason",
+      "type": "string"
+    },
+    "require_human_approval": {
+      "default": false,
+      "title": "Require Human Approval",
+      "type": "boolean"
+    },
+    "require_more_evidence": {
+      "default": false,
+      "title": "Require More Evidence",
+      "type": "boolean"
+    },
+    "require_runbook": {
+      "default": false,
+      "title": "Require Runbook",
+      "type": "boolean"
+    },
+    "require_stronger_judge": {
+      "default": false,
+      "title": "Require Stronger Judge",
+      "type": "boolean"
+    },
+    "require_ticket_link": {
+      "default": false,
+      "title": "Require Ticket Link",
+      "type": "boolean"
+    },
+    "run_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Run Id"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "trace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trace Id"
+    }
+  },
+  "required": [
+    "allow"
+  ],
+  "title": "PolicyGateResult",
+  "type": "object"
+}

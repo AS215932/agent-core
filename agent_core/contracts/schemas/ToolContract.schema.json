@@ -1,0 +1,97 @@
+{
+  "additionalProperties": false,
+  "description": "Typed declaration of a tool (or MCP tool) the runtime may execute.",
+  "properties": {
+    "audit_level": {
+      "default": "standard",
+      "title": "Audit Level",
+      "type": "string"
+    },
+    "input_schema": {
+      "additionalProperties": true,
+      "title": "Input Schema",
+      "type": "object"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "output_schema": {
+      "additionalProperties": true,
+      "title": "Output Schema",
+      "type": "object"
+    },
+    "owner": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Owner"
+    },
+    "permissions": {
+      "additionalProperties": true,
+      "title": "Permissions",
+      "type": "object"
+    },
+    "rate_limit": {
+      "additionalProperties": true,
+      "title": "Rate Limit",
+      "type": "object"
+    },
+    "risk_tier": {
+      "default": "read_only",
+      "enum": [
+        "read_only",
+        "low_write",
+        "high_write",
+        "prod_change"
+      ],
+      "title": "Risk Tier",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "side_effects": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Side Effects"
+    },
+    "timeout_seconds": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Timeout Seconds"
+    },
+    "version": {
+      "default": "1",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "title": "ToolContract",
+  "type": "object"
+}
