@@ -81,43 +81,195 @@
       "title": "GovernanceControls",
       "type": "object"
     },
-    "InsightScore": {
+    "InsightLabel": {
       "additionalProperties": false,
-      "description": "Separated score object for benefit/cost reasoning.",
+      "description": "Human or fixture label used for IDQ/CGS/LL-style evaluations.",
       "properties": {
-        "components": {
-          "additionalProperties": {
-            "type": "number"
-          },
-          "title": "Components",
-          "type": "object"
-        },
-        "rationale": {
+        "acceptable_alternatives": {
           "items": {
+            "enum": [
+              "notify",
+              "question",
+              "draft",
+              "stay_silent"
+            ],
             "type": "string"
           },
-          "title": "Rationale",
+          "title": "Acceptable Alternatives",
           "type": "array"
         },
-        "schema_version": {
-          "default": "0.1.0",
-          "title": "Schema Version",
-          "type": "string"
-        },
-        "total": {
+        "agent_role": {
           "anyOf": [
             {
-              "type": "number"
+              "type": "string"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "title": "Total"
+          "title": "Agent Role"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "environment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Environment"
+        },
+        "faithfulness_verdict": {
+          "anyOf": [
+            {
+              "enum": [
+                "faithful",
+                "partially_faithful",
+                "unsupported",
+                "not_applicable"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Faithfulness Verdict"
+        },
+        "feedback": {
+          "additionalProperties": true,
+          "title": "Feedback",
+          "type": "object"
+        },
+        "graph_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Graph Id"
+        },
+        "graph_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Graph Version"
+        },
+        "insight_id": {
+          "title": "Insight Id",
+          "type": "string"
+        },
+        "label_id": {
+          "title": "Label Id",
+          "type": "string"
+        },
+        "loop": {
+          "enum": [
+            "engineering",
+            "noc",
+            "knowledge",
+            "soc"
+          ],
+          "title": "Loop",
+          "type": "string"
+        },
+        "node_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Node Id"
+        },
+        "reference_action": {
+          "enum": [
+            "notify",
+            "question",
+            "draft",
+            "stay_silent"
+          ],
+          "title": "Reference Action",
+          "type": "string"
+        },
+        "reviewer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewer"
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Run Id"
+        },
+        "schema_version": {
+          "default": "0.1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "support_facts": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Support Facts",
+          "type": "array"
+        },
+        "trace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trace Id"
         }
       },
-      "title": "InsightScore",
+      "required": [
+        "label_id",
+        "insight_id",
+        "loop",
+        "reference_action"
+      ],
+      "title": "InsightLabel",
       "type": "object"
     },
     "SourceRef": {
@@ -246,44 +398,8 @@
     }
   },
   "additionalProperties": false,
-  "description": "Auditable proactive decision, including explicit silence.",
+  "description": "Transport-neutral record for one loop input-to-decision cycle.",
   "properties": {
-    "acceptable_alternatives": {
-      "items": {
-        "enum": [
-          "notify",
-          "question",
-          "draft",
-          "stay_silent"
-        ],
-        "type": "string"
-      },
-      "title": "Acceptable Alternatives",
-      "type": "array"
-    },
-    "action_selected": {
-      "enum": [
-        "notify",
-        "question",
-        "draft",
-        "stay_silent"
-      ],
-      "title": "Action Selected",
-      "type": "string"
-    },
-    "action_space": {
-      "items": {
-        "enum": [
-          "notify",
-          "question",
-          "draft",
-          "stay_silent"
-        ],
-        "type": "string"
-      },
-      "title": "Action Space",
-      "type": "array"
-    },
     "agent_role": {
       "anyOf": [
         {
@@ -295,19 +411,6 @@
       ],
       "default": null,
       "title": "Agent Role"
-    },
-    "budget_context": {
-      "additionalProperties": true,
-      "title": "Budget Context",
-      "type": "object"
-    },
-    "candidate_source": {
-      "title": "Candidate Source",
-      "type": "string"
-    },
-    "candidate_type": {
-      "title": "Candidate Type",
-      "type": "string"
     },
     "case_id": {
       "anyOf": [
@@ -321,27 +424,24 @@
       "default": null,
       "title": "Case Id"
     },
-    "confidence": {
-      "anyOf": [
-        {
-          "type": "number"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Confidence"
-    },
     "created_at": {
       "format": "date-time",
       "title": "Created At",
       "type": "string"
     },
-    "downstream_outcome": {
-      "additionalProperties": true,
-      "title": "Downstream Outcome",
-      "type": "object"
+    "decision": {
+      "enum": [
+        "notify",
+        "question",
+        "draft",
+        "stay_silent"
+      ],
+      "title": "Decision",
+      "type": "string"
+    },
+    "envelope_id": {
+      "title": "Envelope Id",
+      "type": "string"
     },
     "environment": {
       "anyOf": [
@@ -355,30 +455,6 @@
       "default": null,
       "title": "Environment"
     },
-    "evidence_precision": {
-      "anyOf": [
-        {
-          "type": "number"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Evidence Precision"
-    },
-    "evidence_recall": {
-      "anyOf": [
-        {
-          "type": "number"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Evidence Recall"
-    },
     "evidence_refs": {
       "items": {
         "$ref": "#/$defs/SourceRef"
@@ -386,28 +462,8 @@
       "title": "Evidence Refs",
       "type": "array"
     },
-    "expected_utility": {
-      "$ref": "#/$defs/InsightScore"
-    },
-    "faithfulness_verdict": {
-      "anyOf": [
-        {
-          "enum": [
-            "faithful",
-            "partially_faithful",
-            "unsupported",
-            "not_applicable"
-          ],
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Faithfulness Verdict"
-    },
     "fingerprint": {
+      "default": "",
       "title": "Fingerprint",
       "type": "string"
     },
@@ -438,19 +494,17 @@
       "default": null,
       "title": "Graph Version"
     },
-    "human_feedback": {
+    "human_outcome": {
       "additionalProperties": true,
-      "title": "Human Feedback",
+      "title": "Human Outcome",
+      "type": "object"
+    },
+    "input_event": {
+      "additionalProperties": true,
+      "title": "Input Event",
       "type": "object"
     },
     "insight_id": {
-      "title": "Insight Id",
-      "type": "string"
-    },
-    "interruption_cost": {
-      "$ref": "#/$defs/InsightScore"
-    },
-    "learning_event_ref": {
       "anyOf": [
         {
           "type": "string"
@@ -460,7 +514,18 @@
         }
       ],
       "default": null,
-      "title": "Learning Event Ref"
+      "title": "Insight Id"
+    },
+    "learning_label": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/InsightLabel"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     },
     "loop": {
       "enum": [
@@ -496,13 +561,6 @@
       "default": null,
       "title": "Node Id"
     },
-    "observation_ids": {
-      "items": {
-        "type": "string"
-      },
-      "title": "Observation Ids",
-      "type": "array"
-    },
     "policy_version": {
       "anyOf": [
         {
@@ -515,41 +573,17 @@
       "default": null,
       "title": "Policy Version"
     },
-    "reference_action": {
-      "anyOf": [
-        {
-          "enum": [
-            "notify",
-            "question",
-            "draft",
-            "stay_silent"
-          ],
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Reference Action"
+    "proposed_action": {
+      "additionalProperties": true,
+      "title": "Proposed Action",
+      "type": "object"
     },
-    "risk_class": {
-      "anyOf": [
-        {
-          "enum": [
-            "low",
-            "medium",
-            "high",
-            "critical"
-          ],
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Risk Class"
+    "retrieved_context": {
+      "items": {
+        "$ref": "#/$defs/SourceRef"
+      },
+      "title": "Retrieved Context",
+      "type": "array"
     },
     "run_id": {
       "anyOf": [
@@ -563,40 +597,10 @@
       "default": null,
       "title": "Run Id"
     },
-    "sampling_class": {
-      "enum": [
-        "surfaced",
-        "withheld_logged",
-        "sampled_quiet_interval"
-      ],
-      "title": "Sampling Class",
-      "type": "string"
-    },
     "schema_version": {
       "default": "0.1.0",
       "title": "Schema Version",
       "type": "string"
-    },
-    "state_snapshot_refs": {
-      "items": {
-        "type": "string"
-      },
-      "title": "State Snapshot Refs",
-      "type": "array"
-    },
-    "support_facts": {
-      "items": {
-        "type": "string"
-      },
-      "title": "Support Facts",
-      "type": "array"
-    },
-    "tool_versions": {
-      "additionalProperties": {
-        "type": "string"
-      },
-      "title": "Tool Versions",
-      "type": "object"
     },
     "trace_id": {
       "anyOf": [
@@ -609,37 +613,13 @@
       ],
       "default": null,
       "title": "Trace Id"
-    },
-    "why_not_other_actions": {
-      "additionalProperties": {
-        "type": "string"
-      },
-      "propertyNames": {
-        "enum": [
-          "notify",
-          "question",
-          "draft",
-          "stay_silent"
-        ]
-      },
-      "title": "Why Not Other Actions",
-      "type": "object"
-    },
-    "why_now": {
-      "default": "",
-      "title": "Why Now",
-      "type": "string"
     }
   },
   "required": [
-    "insight_id",
+    "envelope_id",
     "loop",
-    "fingerprint",
-    "sampling_class",
-    "candidate_type",
-    "candidate_source",
-    "action_selected"
+    "decision"
   ],
-  "title": "InsightDecisionRecord",
+  "title": "LoopDecisionEnvelope",
   "type": "object"
 }

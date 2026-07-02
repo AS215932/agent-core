@@ -8,6 +8,9 @@ changing any existing loop's behavior**:
 
 - `agent_core/contracts/` — pydantic v2 models (JSON-serializable, schema-versioned).
   Importing them pulls in **only pydantic** (no langgraph / pydantic-ai / db).
+  Includes insight-policy, loop-decision, governance, and arbiter DTOs.
+- `agent_core/arbiter.py` — a deterministic first-pass cross-loop ownership helper for
+  suppressing duplicate NOC/SOC/Engineering/Knowledge escalations.
 - `agent_core/adapters/` — pure mapping functions that convert each loop's existing
   shapes (engineering-loop, NOC agent, knowledge) into the shared contracts. **Imported
   by tests only**; not wired into any loop's runtime.
@@ -16,7 +19,8 @@ changing any existing loop's behavior**:
 
 ## Scope
 
-In: contracts, adapters (test-only), draft GraphSpecs, tests, CI.
+In: contracts, adapters (test-only), draft GraphSpecs, deterministic arbitration helper,
+tests, CI.
 Out (later phases): runtime, GraphSpec compiler, model router, tool/MCP registries,
 memory store, learning substrate, judges, policy gates, control-plane API/GUI.
 

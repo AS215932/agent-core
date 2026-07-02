@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from agent_core.contracts import (
     CostUsage,
+    CrossLoopArbiterDecision,
     DecisionPacket,
     FeedbackEvent,
+    GovernanceControls,
     InsightDecisionRecord,
+    LoopDecisionEnvelope,
     TaskEnvelope,
     ToolResult,
     TraceEvent,
@@ -31,6 +34,24 @@ def test_roundtrips() -> None:
             candidate_type="hotspot",
             candidate_source="proactive_scanner",
             action_selected="notify",
+        )
+    )
+    _roundtrip(
+        LoopDecisionEnvelope(
+            envelope_id="ldec_1",
+            loop="engineering",
+            input_event={"kind": "github_issue", "id": "AS215932/engineering-loop#32"},
+            decision="draft",
+            evidence_refs=[{"ref": "github:AS215932/engineering-loop#32"}],
+            governance=GovernanceControls(approval_tier="operator"),
+        )
+    )
+    _roundtrip(
+        CrossLoopArbiterDecision(
+            arbiter_decision_id="arb_1",
+            event_fingerprint="fp",
+            candidate_loops=["noc", "soc"],
+            owner_loop="noc",
         )
     )
     _roundtrip(FeedbackEvent(feedback_id="f", signal_type="bad", categories=["hallucinated"]))

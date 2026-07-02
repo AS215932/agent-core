@@ -34,6 +34,18 @@
       "default": null,
       "title": "Commit Sha"
     },
+    "evidence_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Evidence Id"
+    },
     "excerpt": {
       "anyOf": [
         {
@@ -58,6 +70,18 @@
       "default": null,
       "title": "Kind"
     },
+    "raw_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Raw Ref"
+    },
     "ref": {
       "title": "Ref",
       "type": "string"
@@ -78,6 +102,18 @@
       "default": "0.1.0",
       "title": "Schema Version",
       "type": "string"
+    },
+    "sensitivity_class": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sensitivity Class"
     }
   },
   "required": [

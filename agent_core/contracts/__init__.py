@@ -23,6 +23,7 @@ from agent_core.contracts.decision import DecisionPacket
 from agent_core.contracts.errors import ErrorEnvelope
 from agent_core.contracts.evidence import EvidencePacket, SourceRef
 from agent_core.contracts.feedback import FeedbackEvent
+from agent_core.contracts.governance import ApprovalTier, GovernanceControls, SensitivityClass
 from agent_core.contracts.graph import EdgeMode, EdgeSpec, GraphSpec, NodeKind, NodeSpec
 from agent_core.contracts.insight import (
     InsightAction,
@@ -32,6 +33,10 @@ from agent_core.contracts.insight import (
     InsightLoop,
     InsightSamplingClass,
     InsightScore,
+)
+from agent_core.contracts.loop import (
+    CrossLoopArbiterDecision,
+    LoopDecisionEnvelope,
 )
 from agent_core.contracts.models import CostUsage, ModelPolicy, RoutingDecision
 from agent_core.contracts.observatory import (
@@ -101,6 +106,11 @@ __all__ = [
     "InsightScore",
     "InsightDecisionRecord",
     "InsightLabel",
+    "SensitivityClass",
+    "ApprovalTier",
+    "GovernanceControls",
+    "LoopDecisionEnvelope",
+    "CrossLoopArbiterDecision",
     # observatory
     "ObservatoryLink",
     "ActorRef",

@@ -14,11 +14,21 @@ from pydantic import Field
 
 from agent_core.contracts._base import RiskLevel, TraceableModel, VersionedModel, utcnow
 from agent_core.contracts.evidence import SourceRef
+from agent_core.contracts.governance import GovernanceControls
 
 InsightAction = Literal["notify", "question", "draft", "stay_silent"]
 InsightSamplingClass = Literal["surfaced", "withheld_logged", "sampled_quiet_interval"]
 InsightLoop = Literal["engineering", "noc", "knowledge", "soc"]
-InsightFaithfulnessVerdict = Literal["faithful", "partially_faithful", "unsupported", "not_applicable"]
+InsightFaithfulnessVerdict = Literal[
+    "faithful",
+    "partially_faithful",
+    "unsupported",
+    "not_applicable",
+]
+
+
+def _default_action_space() -> list[InsightAction]:
+    return ["notify", "question", "draft", "stay_silent"]
 
 
 class InsightScore(VersionedModel):
@@ -46,9 +56,7 @@ class InsightDecisionRecord(TraceableModel):
     state_snapshot_refs: list[str] = Field(default_factory=list)
     support_facts: list[str] = Field(default_factory=list)
     evidence_refs: list[SourceRef] = Field(default_factory=list)
-    action_space: list[InsightAction] = Field(
-        default_factory=lambda: ["notify", "question", "draft", "stay_silent"]
-    )
+    action_space: list[InsightAction] = Field(default_factory=_default_action_space)
     action_selected: InsightAction
     why_now: str = ""
     why_not_other_actions: dict[InsightAction, str] = Field(default_factory=dict)
@@ -59,6 +67,7 @@ class InsightDecisionRecord(TraceableModel):
     policy_version: str | None = None
     tool_versions: dict[str, str] = Field(default_factory=dict)
     budget_context: dict[str, Any] = Field(default_factory=dict)
+    governance: GovernanceControls = Field(default_factory=GovernanceControls)
     reference_action: InsightAction | None = None
     acceptable_alternatives: list[InsightAction] = Field(default_factory=list)
     faithfulness_verdict: InsightFaithfulnessVerdict | None = None
