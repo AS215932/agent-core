@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from agent_core.contracts import HumanApprovalDecision, TaskEnvelope
+from agent_core.contracts import HumanApprovalDecision, InsightDecisionRecord, TaskEnvelope
 
 
 def test_extra_field_forbidden() -> None:
@@ -29,4 +29,19 @@ def test_bad_risk_level() -> None:
     with pytest.raises(ValidationError):
         TaskEnvelope.model_validate(
             {"task_id": "t", "task_class": "c", "source": "s", "risk_level": "extreme"}
+        )
+
+
+def test_bad_insight_action() -> None:
+    with pytest.raises(ValidationError):
+        InsightDecisionRecord.model_validate(
+            {
+                "insight_id": "ins1",
+                "loop": "noc",
+                "fingerprint": "fp",
+                "sampling_class": "surfaced",
+                "candidate_type": "hotspot",
+                "candidate_source": "scanner",
+                "action_selected": "ignore",
+            }
         )

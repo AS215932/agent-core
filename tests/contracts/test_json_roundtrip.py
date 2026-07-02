@@ -4,6 +4,7 @@ from agent_core.contracts import (
     CostUsage,
     DecisionPacket,
     FeedbackEvent,
+    InsightDecisionRecord,
     TaskEnvelope,
     ToolResult,
     TraceEvent,
@@ -21,4 +22,15 @@ def test_roundtrips() -> None:
     _roundtrip(TraceEvent(event_type="x", cost=CostUsage(usd=0.5)))
     _roundtrip(ToolResult(tool="t", output={"a": 1}))
     _roundtrip(DecisionPacket(decision="approve", approved=True))
+    _roundtrip(
+        InsightDecisionRecord(
+            insight_id="ins_noc_1",
+            loop="noc",
+            fingerprint="fp",
+            sampling_class="surfaced",
+            candidate_type="hotspot",
+            candidate_source="proactive_scanner",
+            action_selected="notify",
+        )
+    )
     _roundtrip(FeedbackEvent(feedback_id="f", signal_type="bad", categories=["hallucinated"]))

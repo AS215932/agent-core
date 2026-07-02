@@ -1,0 +1,191 @@
+{
+  "additionalProperties": false,
+  "description": "Human or fixture label used for IDQ/CGS/LL-style evaluations.",
+  "properties": {
+    "acceptable_alternatives": {
+      "items": {
+        "enum": [
+          "notify",
+          "question",
+          "draft",
+          "stay_silent"
+        ],
+        "type": "string"
+      },
+      "title": "Acceptable Alternatives",
+      "type": "array"
+    },
+    "agent_role": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Agent Role"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "environment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Environment"
+    },
+    "faithfulness_verdict": {
+      "anyOf": [
+        {
+          "enum": [
+            "faithful",
+            "partially_faithful",
+            "unsupported",
+            "not_applicable"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Faithfulness Verdict"
+    },
+    "feedback": {
+      "additionalProperties": true,
+      "title": "Feedback",
+      "type": "object"
+    },
+    "graph_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Graph Id"
+    },
+    "graph_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Graph Version"
+    },
+    "insight_id": {
+      "title": "Insight Id",
+      "type": "string"
+    },
+    "label_id": {
+      "title": "Label Id",
+      "type": "string"
+    },
+    "loop": {
+      "enum": [
+        "engineering",
+        "noc",
+        "knowledge",
+        "soc"
+      ],
+      "title": "Loop",
+      "type": "string"
+    },
+    "node_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Node Id"
+    },
+    "reference_action": {
+      "enum": [
+        "notify",
+        "question",
+        "draft",
+        "stay_silent"
+      ],
+      "title": "Reference Action",
+      "type": "string"
+    },
+    "reviewer": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reviewer"
+    },
+    "run_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Run Id"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "support_facts": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Support Facts",
+      "type": "array"
+    },
+    "trace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trace Id"
+    }
+  },
+  "required": [
+    "label_id",
+    "insight_id",
+    "loop",
+    "reference_action"
+  ],
+  "title": "InsightLabel",
+  "type": "object"
+}

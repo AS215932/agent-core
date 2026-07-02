@@ -7,6 +7,7 @@ from agent_core.contracts import (
     EvidencePacket,
     FeedbackEvent,
     HumanApprovalDecision,
+    InsightDecisionRecord,
     PolicyGateResult,
     RunContext,
     TaskEnvelope,
@@ -49,3 +50,17 @@ def test_other_core_models() -> None:
     assert FeedbackEvent(feedback_id="f1").actor_role == "operator"
     approval = HumanApprovalDecision(request_id="i1", decision="approved", approver="op")
     assert approval.decision == "approved"
+
+
+def test_insight_decision_defaults_action_space() -> None:
+    record = InsightDecisionRecord(
+        insight_id="ins1",
+        loop="engineering",
+        fingerprint="fp",
+        sampling_class="withheld_logged",
+        candidate_type="signal",
+        candidate_source="workflow_miner",
+        action_selected="stay_silent",
+    )
+    assert record.action_space == ["notify", "question", "draft", "stay_silent"]
+    assert record.expected_utility.components == {}

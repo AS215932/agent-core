@@ -24,6 +24,15 @@ from agent_core.contracts.errors import ErrorEnvelope
 from agent_core.contracts.evidence import EvidencePacket, SourceRef
 from agent_core.contracts.feedback import FeedbackEvent
 from agent_core.contracts.graph import EdgeMode, EdgeSpec, GraphSpec, NodeKind, NodeSpec
+from agent_core.contracts.insight import (
+    InsightAction,
+    InsightDecisionRecord,
+    InsightFaithfulnessVerdict,
+    InsightLabel,
+    InsightLoop,
+    InsightSamplingClass,
+    InsightScore,
+)
 from agent_core.contracts.models import CostUsage, ModelPolicy, RoutingDecision
 from agent_core.contracts.observatory import (
     ActorRef,
@@ -85,6 +94,13 @@ __all__ = [
     "PolicyGateResult",
     "FeedbackEvent",
     "ErrorEnvelope",
+    "InsightAction",
+    "InsightSamplingClass",
+    "InsightLoop",
+    "InsightFaithfulnessVerdict",
+    "InsightScore",
+    "InsightDecisionRecord",
+    "InsightLabel",
     # observatory
     "ObservatoryLink",
     "ActorRef",
