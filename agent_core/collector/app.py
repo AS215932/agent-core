@@ -24,6 +24,7 @@ from agent_core.collector.db import (
     make_sessionmaker,
 )
 from agent_core.contracts._base import utcnow
+from agent_core.contracts.insight import InsightDecisionRecord, InsightLabel
 from agent_core.contracts.observatory import (
     ActorRef,
     LoopRuntimeSnapshot,
@@ -34,7 +35,6 @@ from agent_core.contracts.observatory import (
     TopologyEdge,
     TopologyNode,
 )
-from agent_core.contracts.insight import InsightDecisionRecord, InsightLabel
 from agent_core.contracts.tracing import TraceEvent
 
 
