@@ -6,14 +6,16 @@ them in Postgres/sqlite. Part of the optional ``collector`` extra.
 
 from __future__ import annotations
 
+import asyncio
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import datetime, timedelta
 from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
-from sqlalchemy import select, text
+from fastapi import FastAPI, Header, HTTPException
+from sqlalchemy import delete, select, text
 
 from agent_core.collector.db import (
     TraceEventRow,
@@ -88,6 +90,68 @@ _STATUS_ALIASES = {
     "failure": "failed",
 }
 _SEVERITIES = {"critical", "high", "medium", "low", "info", "unknown"}
+
+# Insight-stream rows: loop decision envelopes carry the full InsightDecisionRecord
+# beside the envelope; insight labels carry the InsightLabel. Both are pruned by the
+# retention window because the durable copies live in the knowledge repo ledger.
+_INSIGHT_EVENT_TYPES = ("loop_decision_envelope", "insight_label")
+INGEST_TOKEN_ENV = "HYRULE_COLLECTOR_INGEST_TOKEN"
+INSIGHT_RETENTION_ENV = "HYRULE_COLLECTOR_INSIGHT_RETENTION_DAYS"
+DEFAULT_INSIGHT_RETENTION_DAYS = 180
+_PRUNE_INTERVAL_SECONDS = 24 * 3600
+
+
+def _require_ingest_token(authorization: str | None) -> None:
+    expected = os.environ.get(INGEST_TOKEN_ENV, "").strip()
+    if not expected:
+        return
+    provided = ""
+    if authorization and authorization.lower().startswith("bearer "):
+        provided = authorization[len("bearer ") :].strip()
+    if provided != expected:
+        raise HTTPException(status_code=401, detail="invalid or missing ingest token")
+
+
+def _insight_retention_days() -> int:
+    raw = os.environ.get(INSIGHT_RETENTION_ENV, "").strip()
+    if not raw:
+        return DEFAULT_INSIGHT_RETENTION_DAYS
+    try:
+        return max(0, int(raw))
+    except ValueError:
+        return DEFAULT_INSIGHT_RETENTION_DAYS
+
+
+def _parse_since(since: str | None) -> datetime | None:
+    if not since:
+        return None
+    try:
+        return datetime.fromisoformat(since.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="since must be an ISO-8601 timestamp") from exc
+
+
+def _insight_item(row: TraceEventRow) -> dict[str, Any] | None:
+    event = _event(row)
+    raw_payload = event.get("payload")
+    payload: dict[str, Any] = raw_payload if isinstance(raw_payload, dict) else {}
+    if row.event_type == "insight_label":
+        record = payload.get("insight_label")
+        record_type = "label"
+    else:
+        record = payload.get("insight_decision_record")
+        record_type = "decision"
+    if not isinstance(record, dict):
+        return None
+    return {
+        "record_type": record_type,
+        "loop": _text(record.get("loop")),
+        "insight_id": _text(record.get("insight_id")),
+        "label_id": _text(record.get("label_id")),
+        "received_at": (row.received_at or utcnow()).isoformat(),
+        "event_id": row.event_id,
+        "record": record,
+    }
 
 
 def _limit(value: int, *, default: int = 50, maximum: int = 500) -> int:
@@ -255,14 +319,43 @@ def create_app(database_url: str | None = None) -> FastAPI:
     engine = make_engine(database_url)
     sessionmaker = make_sessionmaker(engine)
 
+    async def _prune_insight_rows() -> int:
+        days = _insight_retention_days()
+        if days <= 0:
+            return 0
+        cutoff = utcnow() - timedelta(days=days)
+        stmt = delete(TraceEventRow).where(
+            TraceEventRow.event_type.in_(_INSIGHT_EVENT_TYPES),
+            TraceEventRow.received_at < cutoff,
+        )
+        async with sessionmaker() as session:
+            result = await session.execute(stmt)
+            await session.commit()
+        return int(getattr(result, "rowcount", 0) or 0)
+
+    async def _prune_loop() -> None:
+        while True:
+            await asyncio.sleep(_PRUNE_INTERVAL_SECONDS)
+            try:
+                await _prune_insight_rows()
+            except Exception:  # pragma: no cover - best-effort maintenance
+                continue
+
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         await init_models(engine)
+        try:
+            await _prune_insight_rows()
+        except Exception:  # pragma: no cover - best-effort maintenance
+            pass
+        prune_task = asyncio.create_task(_prune_loop())
         yield
+        prune_task.cancel()
         await engine.dispose()
 
     app = FastAPI(title="agent-core trace collector", version=_package_version(), lifespan=lifespan)
     app.state.collector_sessionmaker = sessionmaker
+    app.state.prune_insight_rows = _prune_insight_rows
 
     @app.get("/healthz")
     async def healthz() -> dict[str, str]:
@@ -274,14 +367,20 @@ def create_app(database_url: str | None = None) -> FastAPI:
         return {"status": "ok"}
 
     @app.post("/v1/trace")
-    async def ingest(event: TraceEvent) -> dict[str, str]:
+    async def ingest(
+        event: TraceEvent, authorization: str | None = Header(default=None)
+    ) -> dict[str, str]:
+        _require_ingest_token(authorization)
         async with sessionmaker() as session:
             session.add(_row_from_event(event))
             await session.commit()
         return {"status": "stored", "event_id": event.event_id}
 
     @app.post("/v1/trace/batch")
-    async def ingest_batch(events: list[TraceEvent]) -> dict[str, int]:
+    async def ingest_batch(
+        events: list[TraceEvent], authorization: str | None = Header(default=None)
+    ) -> dict[str, int]:
+        _require_ingest_token(authorization)
         async with sessionmaker() as session:
             session.add_all([_row_from_event(event) for event in events])
             await session.commit()
@@ -374,6 +473,37 @@ def create_app(database_url: str | None = None) -> FastAPI:
         if not rows:
             raise HTTPException(status_code=404, detail="run not found")
         return [_timeline_item_from_row(row).model_dump(mode="json") for row in rows]
+
+    @app.get("/v1/insights")
+    async def insights(
+        loop: str | None = None,
+        record_type: str | None = None,
+        since: str | None = None,
+        limit: int = 200,
+    ) -> list[dict[str, Any]]:
+        since_at = _parse_since(since)
+        row_limit = _limit(limit, default=200, maximum=1000) * 5
+        stmt = (
+            select(TraceEventRow)
+            .where(TraceEventRow.event_type.in_(_INSIGHT_EVENT_TYPES))
+            .order_by(TraceEventRow.id.desc())
+            .limit(min(row_limit, 5000))
+        )
+        if since_at is not None:
+            stmt = stmt.where(TraceEventRow.received_at >= since_at)
+        async with sessionmaker() as session:
+            rows = list((await session.execute(stmt)).scalars().all())
+        items = []
+        for row in rows:
+            item = _insight_item(row)
+            if item is None:
+                continue
+            if loop and item["loop"] != loop:
+                continue
+            if record_type and item["record_type"] != record_type:
+                continue
+            items.append(item)
+        return items[: _limit(limit, default=200, maximum=1000)]
 
     @app.get("/v1/actions")
     async def actions(
