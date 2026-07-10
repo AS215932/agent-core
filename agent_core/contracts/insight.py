@@ -88,6 +88,7 @@ class InsightLabel(TraceableModel):
     reference_action: InsightAction
     acceptable_alternatives: list[InsightAction] = Field(default_factory=list)
     support_facts: list[str] = Field(default_factory=list)
+    evidence_refs: list[SourceRef] = Field(default_factory=list)
     faithfulness_verdict: InsightFaithfulnessVerdict | None = None
     feedback: dict[str, Any] = Field(default_factory=dict)
     reviewer: str | None = None

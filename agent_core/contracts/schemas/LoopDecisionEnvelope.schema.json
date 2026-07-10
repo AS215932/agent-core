@@ -127,6 +127,13 @@
           "default": null,
           "title": "Environment"
         },
+        "evidence_refs": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
         "faithfulness_verdict": {
           "anyOf": [
             {

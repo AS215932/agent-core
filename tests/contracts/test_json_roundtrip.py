@@ -7,6 +7,7 @@ from agent_core.contracts import (
     FeedbackEvent,
     GovernanceControls,
     InsightDecisionRecord,
+    InsightLabel,
     LoopDecisionEnvelope,
     TaskEnvelope,
     ToolResult,
@@ -55,3 +56,16 @@ def test_roundtrips() -> None:
         )
     )
     _roundtrip(FeedbackEvent(feedback_id="f", signal_type="bad", categories=["hallucinated"]))
+    _roundtrip(
+        InsightLabel(
+            label_id="lbl_obs_1",
+            insight_id="ins_noc_1",
+            loop="noc",
+            reference_action="notify",
+            evidence_refs=[
+                {"ref": "curated/lessons/example", "kind": "okf_concept", "authority": "A1"}
+            ],
+            faithfulness_verdict="faithful",
+            reviewer="svag",
+        )
+    )
