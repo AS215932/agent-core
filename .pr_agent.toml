@@ -1,0 +1,48 @@
+# PR-Agent (advisory) configuration for AS215932/agent-core.
+# Replaces hosted Sourcery. Runs only on the unprivileged hyrule-public-pr
+# runner with read/comment-only perms, on our OpenRouter key.
+# Design: network-operations/docs/ci/pr-agent.md.
+
+[config]
+git_provider = "github"
+# deepseek-v4-flash / minimax-m2.7 are custom models -> need custom_model_max_tokens.
+model = "openrouter/deepseek/deepseek-v4-flash"
+fallback_models = ["openrouter/minimax/minimax-m2.7"]
+custom_model_max_tokens = 128000
+temperature = 0.2
+use_repo_settings_file = true
+publish_output = true
+
+[github_action_config]
+auto_review = true
+auto_describe = false
+auto_improve = true
+
+[pr_reviewer]
+require_security_review = true
+require_tests_review = true
+require_score_review = true
+require_estimate_effort_to_review = true
+extra_instructions = """
+This is agent-core: the shared contract + tracing + collector package every
+AS215932 loop (engineering, noc, soc, knowledge, observatory) depends on.
+HIGHEST RISK is silent cross-loop wire breakage. Flag, with specifics:
+- contract changes that are not strictly additive (removed/renamed fields,
+  type or Literal narrowing, new required fields) — consumers pin different
+  versions and validate with extra="forbid";
+- model changes without regenerated schemas (scripts/export_schemas.py) or
+  schema files edited by hand;
+- collector endpoint changes that weaken auth (ingest token bypass), widen
+  data exposure, or delete/prune rows more aggressively than documented;
+- anything that lets raw logs, secrets, tokens, prompts, or live telemetry
+  payloads into TraceEvent/insight records (sanitization is a hard invariant);
+- nondeterminism added to record shapes (wall-clock defaults on fields that
+  downstream deterministic exports re-serialize);
+- unpinned GitHub Actions, broad GITHUB_TOKEN permissions, added
+  pull_request_target, or pull_request jobs on privileged runner labels
+  (anything but hyrule-public-pr).
+Do not restate the diff; surface risk, compatibility breakage, missing tests.
+"""
+
+[pr_description]
+publish_description_as_comment = true
