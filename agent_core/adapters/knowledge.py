@@ -9,13 +9,50 @@ import hashlib
 from collections.abc import Mapping
 from typing import Any
 
-from agent_core.contracts.evidence import EvidencePacket
+from agent_core.contracts.evidence import EvidencePacket, SourceRef
 from agent_core.contracts.observatory import ObservatoryLink
 from agent_core.contracts.task import TaskEnvelope
 from agent_core.contracts.tracing import TraceEvent
 
 GRAPH_ID = "knowledge"
 _AUTHORITY_ORDER = ["A0", "A1", "A2", "A3", "A4", "A5"]
+
+# Frontmatter authority words -> nearest A-tier (knowledge repo authority.py
+# semantics: canonical curated = reviewed institutional A1, evidence = observed A3,
+# proposed/advisory/stale/disputed stay A4+). Consumers re-derive exact tiers from
+# the store; this mapping only serves display/sorting on the wire.
+_AUTHORITY_WORD_TO_TIER = {
+    "canonical": "A1",
+    "advisory": "A4",
+    "evidence": "A3",
+    "stale": "A5",
+    "disputed": "A5",
+}
+
+
+def source_ref_from_knowledge_citation(citation: Mapping[str, Any]) -> SourceRef:
+    """Map a NOC ``KnowledgeCitation.as_trace_dict()`` mapping to a ``SourceRef``.
+
+    Every loop that cites OKF evidence in an ``InsightDecisionRecord`` must go
+    through this helper so refs stay joinable on the bare concept id (``ref``)
+    and the bundle/export version stays out of the ref (carry it in
+    ``InsightDecisionRecord.tool_versions['knowledge_export']``).
+    """
+    authority_raw = _string_or_none(citation.get("authority")) or ""
+    authority = (
+        authority_raw
+        if authority_raw in _AUTHORITY_ORDER
+        else _AUTHORITY_WORD_TO_TIER.get(authority_raw.lower())
+    )
+    return SourceRef(
+        ref=_string_or_none(citation.get("doc_id")) or "",
+        kind="okf_concept",
+        raw_ref=_string_or_none(citation.get("doc_path")),
+        authority=authority,  # type: ignore[arg-type]
+        commit_sha=_string_or_none(citation.get("repo_revision")),
+        review_status=_string_or_none(citation.get("review_status")),
+        excerpt=_string_or_none(citation.get("section")),
+    )
 
 
 def task_envelope_from_context_request(
