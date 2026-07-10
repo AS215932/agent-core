@@ -1,0 +1,632 @@
+{
+  "$defs": {
+    "GovernanceControls": {
+      "additionalProperties": false,
+      "description": "Contract-level safety controls for loop decisions and learning.",
+      "properties": {
+        "adversarial_review_required": {
+          "default": false,
+          "title": "Adversarial Review Required",
+          "type": "boolean"
+        },
+        "approval_tier": {
+          "default": "none",
+          "enum": [
+            "none",
+            "operator",
+            "senior",
+            "break_glass"
+          ],
+          "title": "Approval Tier",
+          "type": "string"
+        },
+        "learning_allowed": {
+          "default": true,
+          "title": "Learning Allowed",
+          "type": "boolean"
+        },
+        "never_learn": {
+          "default": false,
+          "title": "Never Learn",
+          "type": "boolean"
+        },
+        "policy_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Policy Ids",
+          "type": "array"
+        },
+        "rationale": {
+          "default": "",
+          "title": "Rationale",
+          "type": "string"
+        },
+        "risk_class": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "critical"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Risk Class"
+        },
+        "schema_version": {
+          "default": "0.1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sensitivity_class": {
+          "default": "internal",
+          "enum": [
+            "public",
+            "internal",
+            "private",
+            "sensitive",
+            "secret"
+          ],
+          "title": "Sensitivity Class",
+          "type": "string"
+        }
+      },
+      "title": "GovernanceControls",
+      "type": "object"
+    },
+    "InsightLabel": {
+      "additionalProperties": false,
+      "description": "Human or fixture label used for IDQ/CGS/LL-style evaluations.",
+      "properties": {
+        "acceptable_alternatives": {
+          "items": {
+            "enum": [
+              "notify",
+              "question",
+              "draft",
+              "stay_silent"
+            ],
+            "type": "string"
+          },
+          "title": "Acceptable Alternatives",
+          "type": "array"
+        },
+        "agent_role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Role"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "environment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Environment"
+        },
+        "evidence_refs": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "faithfulness_verdict": {
+          "anyOf": [
+            {
+              "enum": [
+                "faithful",
+                "partially_faithful",
+                "unsupported",
+                "not_applicable"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Faithfulness Verdict"
+        },
+        "feedback": {
+          "additionalProperties": true,
+          "title": "Feedback",
+          "type": "object"
+        },
+        "graph_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Graph Id"
+        },
+        "graph_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Graph Version"
+        },
+        "insight_id": {
+          "title": "Insight Id",
+          "type": "string"
+        },
+        "label_id": {
+          "title": "Label Id",
+          "type": "string"
+        },
+        "loop": {
+          "enum": [
+            "engineering",
+            "noc",
+            "knowledge",
+            "soc"
+          ],
+          "title": "Loop",
+          "type": "string"
+        },
+        "node_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Node Id"
+        },
+        "reference_action": {
+          "enum": [
+            "notify",
+            "question",
+            "draft",
+            "stay_silent"
+          ],
+          "title": "Reference Action",
+          "type": "string"
+        },
+        "reviewer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewer"
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Run Id"
+        },
+        "schema_version": {
+          "default": "0.1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "support_facts": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Support Facts",
+          "type": "array"
+        },
+        "trace_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trace Id"
+        }
+      },
+      "required": [
+        "label_id",
+        "insight_id",
+        "loop",
+        "reference_action"
+      ],
+      "title": "InsightLabel",
+      "type": "object"
+    },
+    "SourceRef": {
+      "additionalProperties": false,
+      "description": "A cited source with optional A0-A5 authority (from the knowledge loop).",
+      "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "enum": [
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "A4",
+                "A5"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authority"
+        },
+        "commit_sha": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Commit Sha"
+        },
+        "evidence_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Id"
+        },
+        "excerpt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Excerpt"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        },
+        "raw_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Ref"
+        },
+        "ref": {
+          "title": "Ref",
+          "type": "string"
+        },
+        "review_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Review Status"
+        },
+        "schema_version": {
+          "default": "0.1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sensitivity_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sensitivity Class"
+        }
+      },
+      "required": [
+        "ref"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Transport-neutral record for one loop input-to-decision cycle.",
+  "properties": {
+    "agent_role": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Agent Role"
+    },
+    "case_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Case Id"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "decision": {
+      "enum": [
+        "notify",
+        "question",
+        "draft",
+        "stay_silent"
+      ],
+      "title": "Decision",
+      "type": "string"
+    },
+    "envelope_id": {
+      "title": "Envelope Id",
+      "type": "string"
+    },
+    "environment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Environment"
+    },
+    "evidence_refs": {
+      "items": {
+        "$ref": "#/$defs/SourceRef"
+      },
+      "title": "Evidence Refs",
+      "type": "array"
+    },
+    "fingerprint": {
+      "default": "",
+      "title": "Fingerprint",
+      "type": "string"
+    },
+    "governance": {
+      "$ref": "#/$defs/GovernanceControls"
+    },
+    "graph_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Graph Id"
+    },
+    "graph_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Graph Version"
+    },
+    "human_outcome": {
+      "additionalProperties": true,
+      "title": "Human Outcome",
+      "type": "object"
+    },
+    "input_event": {
+      "additionalProperties": true,
+      "title": "Input Event",
+      "type": "object"
+    },
+    "insight_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Insight Id"
+    },
+    "learning_label": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/InsightLabel"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "loop": {
+      "enum": [
+        "engineering",
+        "noc",
+        "knowledge",
+        "soc"
+      ],
+      "title": "Loop",
+      "type": "string"
+    },
+    "meta_case_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Meta Case Id"
+    },
+    "node_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Node Id"
+    },
+    "policy_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Policy Version"
+    },
+    "proposed_action": {
+      "additionalProperties": true,
+      "title": "Proposed Action",
+      "type": "object"
+    },
+    "retrieved_context": {
+      "items": {
+        "$ref": "#/$defs/SourceRef"
+      },
+      "title": "Retrieved Context",
+      "type": "array"
+    },
+    "run_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Run Id"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "trace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trace Id"
+    }
+  },
+  "required": [
+    "envelope_id",
+    "loop",
+    "decision"
+  ],
+  "title": "LoopDecisionEnvelope",
+  "type": "object"
+}

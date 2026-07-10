@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from agent_core.contracts import HumanApprovalDecision, TaskEnvelope
+from agent_core.contracts import HumanApprovalDecision, InsightDecisionRecord, TaskEnvelope
 
 
 def test_extra_field_forbidden() -> None:
@@ -30,3 +30,42 @@ def test_bad_risk_level() -> None:
         TaskEnvelope.model_validate(
             {"task_id": "t", "task_class": "c", "source": "s", "risk_level": "extreme"}
         )
+
+
+def test_bad_insight_action() -> None:
+    with pytest.raises(ValidationError):
+        InsightDecisionRecord.model_validate(
+            {
+                "insight_id": "ins1",
+                "loop": "noc",
+                "fingerprint": "fp",
+                "sampling_class": "surfaced",
+                "candidate_type": "hotspot",
+                "candidate_source": "scanner",
+                "action_selected": "ignore",
+            }
+        )
+
+
+def test_action_selected_outside_action_space_rejected() -> None:
+    import pytest
+
+    from agent_core.contracts import InsightDecisionRecord
+
+    base = {
+        "insight_id": "ins_x",
+        "loop": "noc",
+        "fingerprint": "fp",
+        "sampling_class": "surfaced",
+        "candidate_type": "hotspot",
+        "candidate_source": "scanner",
+    }
+    with pytest.raises(ValueError, match="outside action_space"):
+        InsightDecisionRecord.model_validate(
+            {**base, "action_space": ["notify"], "action_selected": "draft"}
+        )
+    # within a narrowed space is fine, as is the default full space
+    InsightDecisionRecord.model_validate(
+        {**base, "action_space": ["notify"], "action_selected": "notify"}
+    )
+    InsightDecisionRecord.model_validate({**base, "action_selected": "draft"})

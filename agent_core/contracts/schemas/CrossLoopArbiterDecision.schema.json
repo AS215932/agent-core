@@ -1,0 +1,422 @@
+{
+  "$defs": {
+    "GovernanceControls": {
+      "additionalProperties": false,
+      "description": "Contract-level safety controls for loop decisions and learning.",
+      "properties": {
+        "adversarial_review_required": {
+          "default": false,
+          "title": "Adversarial Review Required",
+          "type": "boolean"
+        },
+        "approval_tier": {
+          "default": "none",
+          "enum": [
+            "none",
+            "operator",
+            "senior",
+            "break_glass"
+          ],
+          "title": "Approval Tier",
+          "type": "string"
+        },
+        "learning_allowed": {
+          "default": true,
+          "title": "Learning Allowed",
+          "type": "boolean"
+        },
+        "never_learn": {
+          "default": false,
+          "title": "Never Learn",
+          "type": "boolean"
+        },
+        "policy_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Policy Ids",
+          "type": "array"
+        },
+        "rationale": {
+          "default": "",
+          "title": "Rationale",
+          "type": "string"
+        },
+        "risk_class": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "critical"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Risk Class"
+        },
+        "schema_version": {
+          "default": "0.1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sensitivity_class": {
+          "default": "internal",
+          "enum": [
+            "public",
+            "internal",
+            "private",
+            "sensitive",
+            "secret"
+          ],
+          "title": "Sensitivity Class",
+          "type": "string"
+        }
+      },
+      "title": "GovernanceControls",
+      "type": "object"
+    },
+    "SourceRef": {
+      "additionalProperties": false,
+      "description": "A cited source with optional A0-A5 authority (from the knowledge loop).",
+      "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "enum": [
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "A4",
+                "A5"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authority"
+        },
+        "commit_sha": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Commit Sha"
+        },
+        "evidence_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Id"
+        },
+        "excerpt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Excerpt"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        },
+        "raw_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Ref"
+        },
+        "ref": {
+          "title": "Ref",
+          "type": "string"
+        },
+        "review_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Review Status"
+        },
+        "schema_version": {
+          "default": "0.1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sensitivity_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sensitivity Class"
+        }
+      },
+      "required": [
+        "ref"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Ownership/speaking decision when multiple loops see the same event.",
+  "properties": {
+    "agent_role": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Agent Role"
+    },
+    "arbiter_decision_id": {
+      "title": "Arbiter Decision Id",
+      "type": "string"
+    },
+    "candidate_loops": {
+      "items": {
+        "enum": [
+          "engineering",
+          "noc",
+          "knowledge",
+          "soc"
+        ],
+        "type": "string"
+      },
+      "title": "Candidate Loops",
+      "type": "array"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "environment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Environment"
+    },
+    "event_fingerprint": {
+      "title": "Event Fingerprint",
+      "type": "string"
+    },
+    "evidence_refs": {
+      "items": {
+        "$ref": "#/$defs/SourceRef"
+      },
+      "title": "Evidence Refs",
+      "type": "array"
+    },
+    "governance": {
+      "$ref": "#/$defs/GovernanceControls"
+    },
+    "graph_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Graph Id"
+    },
+    "graph_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Graph Version"
+    },
+    "merged_case_refs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Merged Case Refs",
+      "type": "array"
+    },
+    "node_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Node Id"
+    },
+    "owner_loop": {
+      "anyOf": [
+        {
+          "enum": [
+            "engineering",
+            "noc",
+            "knowledge",
+            "soc"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Owner Loop"
+    },
+    "policy_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Policy Version"
+    },
+    "rationale": {
+      "default": "",
+      "title": "Rationale",
+      "type": "string"
+    },
+    "related_case_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Related Case Ids",
+      "type": "array"
+    },
+    "run_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Run Id"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "selected_action": {
+      "default": "stay_silent",
+      "enum": [
+        "notify",
+        "question",
+        "draft",
+        "stay_silent"
+      ],
+      "title": "Selected Action",
+      "type": "string"
+    },
+    "speak_loop": {
+      "anyOf": [
+        {
+          "enum": [
+            "engineering",
+            "noc",
+            "knowledge",
+            "soc"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Speak Loop"
+    },
+    "trace_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trace Id"
+    }
+  },
+  "required": [
+    "arbiter_decision_id",
+    "event_fingerprint"
+  ],
+  "title": "CrossLoopArbiterDecision",
+  "type": "object"
+}

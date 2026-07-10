@@ -2,8 +2,13 @@ from __future__ import annotations
 
 from agent_core.contracts import (
     CostUsage,
+    CrossLoopArbiterDecision,
     DecisionPacket,
     FeedbackEvent,
+    GovernanceControls,
+    InsightDecisionRecord,
+    InsightLabel,
+    LoopDecisionEnvelope,
     TaskEnvelope,
     ToolResult,
     TraceEvent,
@@ -21,4 +26,46 @@ def test_roundtrips() -> None:
     _roundtrip(TraceEvent(event_type="x", cost=CostUsage(usd=0.5)))
     _roundtrip(ToolResult(tool="t", output={"a": 1}))
     _roundtrip(DecisionPacket(decision="approve", approved=True))
+    _roundtrip(
+        InsightDecisionRecord(
+            insight_id="ins_noc_1",
+            loop="noc",
+            fingerprint="fp",
+            sampling_class="surfaced",
+            candidate_type="hotspot",
+            candidate_source="proactive_scanner",
+            action_selected="notify",
+        )
+    )
+    _roundtrip(
+        LoopDecisionEnvelope(
+            envelope_id="ldec_1",
+            loop="engineering",
+            input_event={"kind": "github_issue", "id": "AS215932/engineering-loop#32"},
+            decision="draft",
+            evidence_refs=[{"ref": "github:AS215932/engineering-loop#32"}],
+            governance=GovernanceControls(approval_tier="operator"),
+        )
+    )
+    _roundtrip(
+        CrossLoopArbiterDecision(
+            arbiter_decision_id="arb_1",
+            event_fingerprint="fp",
+            candidate_loops=["noc", "soc"],
+            owner_loop="noc",
+        )
+    )
     _roundtrip(FeedbackEvent(feedback_id="f", signal_type="bad", categories=["hallucinated"]))
+    _roundtrip(
+        InsightLabel(
+            label_id="lbl_obs_1",
+            insight_id="ins_noc_1",
+            loop="noc",
+            reference_action="notify",
+            evidence_refs=[
+                {"ref": "curated/lessons/example", "kind": "okf_concept", "authority": "A1"}
+            ],
+            faithfulness_verdict="faithful",
+            reviewer="svag",
+        )
+    )

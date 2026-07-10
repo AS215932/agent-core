@@ -15,6 +15,9 @@ class SourceRef(VersionedModel):
 
     ref: str
     kind: str | None = None
+    evidence_id: str | None = None
+    sensitivity_class: str | None = None
+    raw_ref: str | None = None
     authority: AuthorityTier | None = None
     commit_sha: str | None = None
     review_status: str | None = None
