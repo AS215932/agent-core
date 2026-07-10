@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from collections.abc import Iterable
 from typing import Any
 
@@ -10,9 +11,19 @@ from agent_core.contracts import CrossLoopArbiterDecision, InsightLoop, SourceRe
 
 _OWNER_PRIORITY: tuple[InsightLoop, ...] = ("soc", "noc", "engineering", "knowledge")
 
+# Hints are matched as whole tokens (see _matches), so short hints like
+# "pull_request" cannot fire inside unrelated words ("proactive", "proposed").
 _SOC_HINTS = {"security", "control_drift", "posture", "attack", "abuse", "detection"}
 _NOC_HINTS = {"availability", "hotspot", "alert", "infra", "network", "routing", "disk"}
-_ENGINEERING_HINTS = {"approved_queue", "github_issue", "implementation", "code", "pr"}
+_ENGINEERING_HINTS = {
+    "approved_queue",
+    "github_issue",
+    "implementation",
+    "code",
+    "github_pr",
+    "pull_request",
+}
+_TOKEN_RE = re.compile(r"[a-z0-9_]+")
 
 
 def arbitrate_cross_loop_event(
@@ -60,12 +71,16 @@ def _loop(value: Any) -> InsightLoop | None:
 
 
 def _owner_from_hints(rows: list[dict[str, Any]]) -> InsightLoop | None:
-    by_loop = {_loop(row.get("loop")): _hint_text(row) for row in rows}
-    if _matches(by_loop.get("soc", ""), _SOC_HINTS):
+    # Aggregate hint text across ALL candidates per loop: duplicate escalations
+    # from one loop must not erase an earlier row's evidence.
+    by_loop: dict[InsightLoop | None, list[str]] = {}
+    for row in rows:
+        by_loop.setdefault(_loop(row.get("loop")), []).append(_hint_text(row))
+    if _matches(" ".join(by_loop.get("soc", [])), _SOC_HINTS):
         return "soc"
-    if _matches(by_loop.get("noc", ""), _NOC_HINTS):
+    if _matches(" ".join(by_loop.get("noc", [])), _NOC_HINTS):
         return "noc"
-    if _matches(by_loop.get("engineering", ""), _ENGINEERING_HINTS):
+    if _matches(" ".join(by_loop.get("engineering", [])), _ENGINEERING_HINTS):
         return "engineering"
     return None
 
@@ -78,7 +93,7 @@ def _hint_text(row: dict[str, Any]) -> str:
 
 
 def _matches(text: str, hints: set[str]) -> bool:
-    return any(hint in text for hint in hints)
+    return bool(set(_TOKEN_RE.findall(text)) & hints)
 
 
 def _first_by_priority(loops: list[InsightLoop]) -> InsightLoop | None:

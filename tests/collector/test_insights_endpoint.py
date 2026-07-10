@@ -203,3 +203,28 @@ def test_retention_zero_disables_prune(tmp_path, monkeypatch) -> None:
     with TestClient(create_app(url)) as client:
         items = client.get("/v1/insights").json()
         assert [item["record"]["insight_id"] for item in items] == ["ins_ancient"]
+
+
+def test_insights_paging_finds_matches_beyond_first_batch(tmp_path, monkeypatch) -> None:
+    import agent_core.collector.app as collector_app
+
+    monkeypatch.setattr(collector_app, "_INSIGHT_SCAN_BATCH", 3)
+    with TestClient(_app(tmp_path)) as client:
+        # older soc records first, then a wall of newer noc records wider than
+        # one scan batch — the loop filter must page past it
+        for index in range(2):
+            client.post("/v1/trace", json=_envelope_event(f"ins_soc_{index}", loop="soc"))
+        for index in range(6):
+            client.post("/v1/trace", json=_envelope_event(f"ins_noc_{index}"))
+        items = client.get("/v1/insights", params={"loop": "soc", "limit": 5}).json()
+        assert sorted(item["record"]["insight_id"] for item in items) == ["ins_soc_0", "ins_soc_1"]
+
+
+def test_insights_skips_contract_invalid_records(tmp_path) -> None:
+    with TestClient(_app(tmp_path)) as client:
+        bad = _envelope_event("ins_bad")
+        bad["payload"]["insight_decision_record"]["action_selected"] = "explode"
+        assert client.post("/v1/trace", json=bad).status_code == 200
+        assert client.post("/v1/trace", json=_envelope_event("ins_good")).status_code == 200
+        items = client.get("/v1/insights").json()
+        assert [item["record"]["insight_id"] for item in items] == ["ins_good"]

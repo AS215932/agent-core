@@ -24,6 +24,7 @@ _AUTHORITY_ORDER = ["A0", "A1", "A2", "A3", "A4", "A5"]
 _AUTHORITY_WORD_TO_TIER = {
     "canonical": "A1",
     "advisory": "A4",
+    "proposed": "A4",
     "evidence": "A3",
     "stale": "A5",
     "disputed": "A5",

@@ -68,3 +68,8 @@ def test_source_ref_from_knowledge_citation_tier_passthrough_and_unknown() -> No
     assert _authority("advisory") == "A4"
     assert _authority("weird") is None
     assert kn.source_ref_from_knowledge_citation({}).ref == ""
+
+
+def test_source_ref_authority_proposed_maps_to_a4() -> None:
+    ref = kn.source_ref_from_knowledge_citation({"doc_id": "x", "authority": "proposed"})
+    assert ref.authority == "A4"

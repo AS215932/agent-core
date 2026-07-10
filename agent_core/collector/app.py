@@ -34,6 +34,7 @@ from agent_core.contracts.observatory import (
     TopologyEdge,
     TopologyNode,
 )
+from agent_core.contracts.insight import InsightDecisionRecord, InsightLabel
 from agent_core.contracts.tracing import TraceEvent
 
 
@@ -99,6 +100,7 @@ INGEST_TOKEN_ENV = "HYRULE_COLLECTOR_INGEST_TOKEN"
 INSIGHT_RETENTION_ENV = "HYRULE_COLLECTOR_INSIGHT_RETENTION_DAYS"
 DEFAULT_INSIGHT_RETENTION_DAYS = 180
 _PRUNE_INTERVAL_SECONDS = 24 * 3600
+_INSIGHT_SCAN_BATCH = 1000
 
 
 def _require_ingest_token(authorization: str | None) -> None:
@@ -138,10 +140,19 @@ def _insight_item(row: TraceEventRow) -> dict[str, Any] | None:
     if row.event_type == "insight_label":
         record = payload.get("insight_label")
         record_type = "label"
+        model: type[InsightDecisionRecord] | type[InsightLabel] = InsightLabel
     else:
         record = payload.get("insight_decision_record")
         record_type = "decision"
+        model = InsightDecisionRecord
     if not isinstance(record, dict):
+        return None
+    # The outer TraceEvent validates regardless of payload shape; this endpoint
+    # promises contract-valid records to labels/metrics consumers, so rows the
+    # committed contracts would reject are skipped rather than served.
+    try:
+        record = model.model_validate(record).model_dump(mode="json")
+    except Exception:
         return None
     return {
         "record_type": record_type,
@@ -482,28 +493,41 @@ def create_app(database_url: str | None = None) -> FastAPI:
         limit: int = 200,
     ) -> list[dict[str, Any]]:
         since_at = _parse_since(since)
-        row_limit = _limit(limit, default=200, maximum=1000) * 5
-        stmt = (
-            select(TraceEventRow)
-            .where(TraceEventRow.event_type.in_(_INSIGHT_EVENT_TYPES))
-            .order_by(TraceEventRow.id.desc())
-            .limit(min(row_limit, 5000))
-        )
-        if since_at is not None:
-            stmt = stmt.where(TraceEventRow.received_at >= since_at)
+        wanted = _limit(limit, default=200, maximum=1000)
+        # loop/record_type live inside the JSON payload, so they filter in
+        # Python — keyset-paginate over insight-typed rows (newest first) until
+        # `limit` matches are collected or the rows are exhausted, instead of
+        # capping the scan before filtering (which could miss older matches).
+        items: list[dict[str, Any]] = []
+        cursor: int | None = None
         async with sessionmaker() as session:
-            rows = list((await session.execute(stmt)).scalars().all())
-        items = []
-        for row in rows:
-            item = _insight_item(row)
-            if item is None:
-                continue
-            if loop and item["loop"] != loop:
-                continue
-            if record_type and item["record_type"] != record_type:
-                continue
-            items.append(item)
-        return items[: _limit(limit, default=200, maximum=1000)]
+            while len(items) < wanted:
+                stmt = (
+                    select(TraceEventRow)
+                    .where(TraceEventRow.event_type.in_(_INSIGHT_EVENT_TYPES))
+                    .order_by(TraceEventRow.id.desc())
+                    .limit(_INSIGHT_SCAN_BATCH)
+                )
+                if since_at is not None:
+                    stmt = stmt.where(TraceEventRow.received_at >= since_at)
+                if cursor is not None:
+                    stmt = stmt.where(TraceEventRow.id < cursor)
+                rows = list((await session.execute(stmt)).scalars().all())
+                if not rows:
+                    break
+                cursor = rows[-1].id
+                for row in rows:
+                    item = _insight_item(row)
+                    if item is None:
+                        continue
+                    if loop and item["loop"] != loop:
+                        continue
+                    if record_type and item["record_type"] != record_type:
+                        continue
+                    items.append(item)
+                    if len(items) >= wanted:
+                        break
+        return items
 
     @app.get("/v1/actions")
     async def actions(
