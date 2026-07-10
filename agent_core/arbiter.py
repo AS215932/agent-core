@@ -23,6 +23,15 @@ _ENGINEERING_HINTS = {
     "github_pr",
     "pull_request",
 }
+_KNOWLEDGE_HINTS = {
+    "context",
+    "context_pack",
+    "citation",
+    "memory",
+    "learning_ledger",
+    "knowledge_gap",
+    "promotion",
+}
 _TOKEN_RE = re.compile(r"[a-z0-9_]+")
 
 
@@ -82,6 +91,8 @@ def _owner_from_hints(rows: list[dict[str, Any]]) -> InsightLoop | None:
         return "noc"
     if _matches(" ".join(by_loop.get("engineering", [])), _ENGINEERING_HINTS):
         return "engineering"
+    if _matches(" ".join(by_loop.get("knowledge", [])), _KNOWLEDGE_HINTS):
+        return "knowledge"
     return None
 
 
@@ -104,12 +115,18 @@ def _first_by_priority(loops: list[InsightLoop]) -> InsightLoop | None:
 
 
 def _selected_action_for_owner(rows: list[dict[str, Any]], owner: InsightLoop) -> str:
+    """The owner loop's chosen action, reconciled across its candidate rows.
+
+    Accepts both InsightDecisionRecord shapes (``action_selected``) and raw
+    LoopDecisionEnvelope shapes (``decision``). A surfaced choice from any
+    owner row wins over quiet samples — duplicate escalation replays must not
+    let a stay_silent row mute an escalation the loop actually made."""
     for row in rows:
-        if _loop(row.get("loop")) == owner:
-            action = str(row.get("action_selected") or "stay_silent")
-            if action in {"notify", "question", "draft", "stay_silent"}:
-                return action
-            return "stay_silent"
+        if _loop(row.get("loop")) != owner:
+            continue
+        action = str(row.get("action_selected") or row.get("decision") or "stay_silent")
+        if action in {"notify", "question", "draft"}:
+            return action
     return "stay_silent"
 
 

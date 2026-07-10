@@ -45,3 +45,27 @@ def test_bad_insight_action() -> None:
                 "action_selected": "ignore",
             }
         )
+
+
+def test_action_selected_outside_action_space_rejected() -> None:
+    import pytest
+
+    from agent_core.contracts import InsightDecisionRecord
+
+    base = {
+        "insight_id": "ins_x",
+        "loop": "noc",
+        "fingerprint": "fp",
+        "sampling_class": "surfaced",
+        "candidate_type": "hotspot",
+        "candidate_source": "scanner",
+    }
+    with pytest.raises(ValueError, match="outside action_space"):
+        InsightDecisionRecord.model_validate(
+            {**base, "action_space": ["notify"], "action_selected": "draft"}
+        )
+    # within a narrowed space is fine, as is the default full space
+    InsightDecisionRecord.model_validate(
+        {**base, "action_space": ["notify"], "action_selected": "notify"}
+    )
+    InsightDecisionRecord.model_validate({**base, "action_selected": "draft"})

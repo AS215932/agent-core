@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from agent_core.contracts._base import RiskLevel, TraceableModel, VersionedModel, utcnow
 from agent_core.contracts.evidence import SourceRef
@@ -76,6 +76,17 @@ class InsightDecisionRecord(TraceableModel):
     human_feedback: dict[str, Any] = Field(default_factory=dict)
     downstream_outcome: dict[str, Any] = Field(default_factory=dict)
     learning_event_ref: str | None = None
+
+    @model_validator(mode="after")
+    def _selected_action_within_space(self) -> InsightDecisionRecord:
+        # action_space is the replay/learning denominator; a decision outside a
+        # policy-narrowed space is impossible and must be rejected at ingest.
+        if self.action_space and self.action_selected not in self.action_space:
+            raise ValueError(
+                f"action_selected {self.action_selected!r} is outside "
+                f"action_space {self.action_space!r}"
+            )
+        return self
 
 
 class InsightLabel(TraceableModel):

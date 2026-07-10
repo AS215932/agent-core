@@ -84,3 +84,53 @@ def test_engineering_pr_hint_requires_whole_token() -> None:
         ],
     )
     assert hinted.owner_loop == "engineering"
+
+
+def test_owner_action_reads_envelope_decision_field() -> None:
+    from agent_core.arbiter import arbitrate_cross_loop_event
+
+    decision = arbitrate_cross_loop_event(
+        event_fingerprint="fp-env",
+        candidates=[
+            # raw LoopDecisionEnvelope shape: action lives in `decision`
+            {"loop": "noc", "candidate_type": "hotspot", "decision": "notify"},
+        ],
+    )
+    assert decision.owner_loop == "noc"
+    assert decision.selected_action == "notify"
+    assert decision.speak_loop == "noc"
+
+
+def test_owner_prefers_surfaced_action_over_quiet_sample() -> None:
+    from agent_core.arbiter import arbitrate_cross_loop_event
+
+    decision = arbitrate_cross_loop_event(
+        event_fingerprint="fp-mixed",
+        candidates=[
+            {"loop": "noc", "candidate_type": "hotspot", "action_selected": "stay_silent"},
+            {"loop": "noc", "candidate_type": "hotspot", "action_selected": "notify"},
+        ],
+    )
+    assert decision.owner_loop == "noc"
+    # the quiet sample must not mute the escalation the loop actually chose
+    assert decision.selected_action == "notify"
+    assert decision.speak_loop == "noc"
+
+
+def test_knowledge_hints_grant_knowledge_ownership() -> None:
+    from agent_core.arbiter import arbitrate_cross_loop_event
+
+    decision = arbitrate_cross_loop_event(
+        event_fingerprint="fp-know",
+        candidates=[
+            # generic NOC row with no NOC-specific hints
+            {"loop": "noc", "candidate_type": "telemetry", "action_selected": "notify"},
+            {
+                "loop": "knowledge",
+                "candidate_type": "knowledge_gap",
+                "candidate_source": "learning_ledger",
+                "action_selected": "draft",
+            },
+        ],
+    )
+    assert decision.owner_loop == "knowledge"
