@@ -1,0 +1,82 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "approval_id": {
+      "title": "Approval Id",
+      "type": "string"
+    },
+    "approver_id": {
+      "title": "Approver Id",
+      "type": "string"
+    },
+    "approver_login": {
+      "default": "",
+      "title": "Approver Login",
+      "type": "string"
+    },
+    "approver_role": {
+      "enum": [
+        "operator",
+        "senior"
+      ],
+      "title": "Approver Role",
+      "type": "string"
+    },
+    "decided_at": {
+      "format": "date-time",
+      "title": "Decided At",
+      "type": "string"
+    },
+    "decision": {
+      "enum": [
+        "approved",
+        "rejected"
+      ],
+      "title": "Decision",
+      "type": "string"
+    },
+    "expires_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expires At"
+    },
+    "handoff_id": {
+      "title": "Handoff Id",
+      "type": "string"
+    },
+    "rationale": {
+      "default": "",
+      "maxLength": 2000,
+      "title": "Rationale",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "scope_hash": {
+      "maxLength": 64,
+      "minLength": 64,
+      "title": "Scope Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "handoff_id",
+    "scope_hash",
+    "decision",
+    "approver_id",
+    "approver_role"
+  ],
+  "title": "ApprovalRecord",
+  "type": "object"
+}

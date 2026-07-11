@@ -19,6 +19,22 @@ from agent_core.contracts.approval import (
     PolicyGateResult,
 )
 from agent_core.contracts.context import RunContext, RuntimeContext
+from agent_core.contracts.coordination import (
+    CORE_LOOPS,
+    LHP_VERSION,
+    ApprovalRecord,
+    CaseProjection,
+    HandoffEnvelope,
+    HandoffEvent,
+    HandoffEventType,
+    HandoffRecord,
+    HandoffResult,
+    HandoffStatus,
+    LoopHeartbeat,
+    LoopRegistration,
+    ProbePlan,
+    VerificationResult,
+)
 from agent_core.contracts.decision import DecisionPacket
 from agent_core.contracts.errors import ErrorEnvelope
 from agent_core.contracts.evidence import EvidencePacket, SourceRef
@@ -111,6 +127,21 @@ __all__ = [
     "GovernanceControls",
     "LoopDecisionEnvelope",
     "CrossLoopArbiterDecision",
+    # LHP-v2 coordination
+    "CORE_LOOPS",
+    "LHP_VERSION",
+    "LoopRegistration",
+    "LoopHeartbeat",
+    "CaseProjection",
+    "HandoffEnvelope",
+    "HandoffEvent",
+    "HandoffEventType",
+    "HandoffResult",
+    "VerificationResult",
+    "ApprovalRecord",
+    "HandoffRecord",
+    "HandoffStatus",
+    "ProbePlan",
     # observatory
     "ObservatoryLink",
     "ActorRef",

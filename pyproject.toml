@@ -4,21 +4,26 @@ build-backend = "hatchling.build"
 
 [project]
 name = "agent-core"
-version = "0.7.0"
-description = "Shared typed contracts for the AS215932 Agent Runtime Framework (Phase 1 / §31 safe milestone)."
+version = "0.9.0"
+description = "Shared typed contracts and optional coordination services for AS215932 agentic loops."
 requires-python = ">=3.11"
 dependencies = ["pydantic>=2,<3"]
 
 [project.optional-dependencies]
 collector = ["fastapi>=0.110", "uvicorn>=0.29", "sqlalchemy>=2", "asyncpg>=0.29"]
+coordination-client = ["httpx>=0.27"]
+coordinator = [
+    "fastapi>=0.110", "uvicorn>=0.29", "sqlalchemy>=2", "asyncpg>=0.29",
+    "httpx>=0.27", "aiosqlite>=0.20",
+]
 dev = [
-    "pytest>=8", "pyyaml>=6", "ruff>=0.5", "mypy>=1.8", "types-PyYAML",
+    "pytest>=8", "pytest-asyncio>=0.23", "pyyaml>=6", "ruff>=0.5", "mypy>=1.8", "types-PyYAML",
     "fastapi>=0.110", "uvicorn>=0.29", "sqlalchemy>=2", "httpx>=0.27", "aiosqlite>=0.20",
 ]
 
 [dependency-groups]
 dev = [
-    "pytest>=8", "pyyaml>=6", "ruff>=0.5", "mypy>=1.8", "types-PyYAML",
+    "pytest>=8", "pytest-asyncio>=0.23", "pyyaml>=6", "ruff>=0.5", "mypy>=1.8", "types-PyYAML",
     "fastapi>=0.110", "uvicorn>=0.29", "sqlalchemy>=2", "httpx>=0.27", "aiosqlite>=0.20",
 ]
 
@@ -41,3 +46,7 @@ disallow_untyped_defs = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[project.scripts]
+agent-core-coordinator = "agent_core.coordinator.__main__:main"

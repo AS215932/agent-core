@@ -1,0 +1,213 @@
+{
+  "$defs": {
+    "SourceRef": {
+      "additionalProperties": false,
+      "description": "A cited source with optional A0-A5 authority (from the knowledge loop).",
+      "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "enum": [
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "A4",
+                "A5"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authority"
+        },
+        "commit_sha": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Commit Sha"
+        },
+        "evidence_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Id"
+        },
+        "excerpt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Excerpt"
+        },
+        "kind": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kind"
+        },
+        "raw_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Ref"
+        },
+        "ref": {
+          "title": "Ref",
+          "type": "string"
+        },
+        "review_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Review Status"
+        },
+        "schema_version": {
+          "default": "0.1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sensitivity_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sensitivity Class"
+        }
+      },
+      "required": [
+        "ref"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Bounded RT-2 plan.  The coordinator approval binds its serialized hash.",
+  "properties": {
+    "allow_redirects": {
+      "default": false,
+      "title": "Allow Redirects",
+      "type": "boolean"
+    },
+    "approved_asset_refs": {
+      "items": {
+        "$ref": "#/$defs/SourceRef"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Approved Asset Refs",
+      "type": "array"
+    },
+    "max_concurrency": {
+      "default": 2,
+      "maximum": 2,
+      "minimum": 1,
+      "title": "Max Concurrency",
+      "type": "integer"
+    },
+    "max_duration_seconds": {
+      "default": 600,
+      "maximum": 600,
+      "minimum": 1,
+      "title": "Max Duration Seconds",
+      "type": "integer"
+    },
+    "max_requests": {
+      "default": 100,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Max Requests",
+      "type": "integer"
+    },
+    "ports": {
+      "items": {
+        "type": "integer"
+      },
+      "maxItems": 32,
+      "title": "Ports",
+      "type": "array"
+    },
+    "probe_kind": {
+      "enum": [
+        "tcp_connect_sweep",
+        "tls_handshake",
+        "http_headers",
+        "dns_consistency"
+      ],
+      "title": "Probe Kind",
+      "type": "string"
+    },
+    "requests_per_second_per_target": {
+      "default": 1.0,
+      "exclusiveMinimum": 0,
+      "maximum": 1.0,
+      "title": "Requests Per Second Per Target",
+      "type": "number"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "targets": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 3,
+      "minItems": 1,
+      "title": "Targets",
+      "type": "array"
+    }
+  },
+  "required": [
+    "probe_kind",
+    "targets",
+    "approved_asset_refs"
+  ],
+  "title": "ProbePlan",
+  "type": "object"
+}

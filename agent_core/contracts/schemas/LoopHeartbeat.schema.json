@@ -1,0 +1,46 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "loop_id": {
+      "title": "Loop Id",
+      "type": "string"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    },
+    "observed_at": {
+      "format": "date-time",
+      "title": "Observed At",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "default": "active",
+      "enum": [
+        "active",
+        "idle",
+        "degraded",
+        "disabled"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "summary": {
+      "default": "",
+      "maxLength": 500,
+      "title": "Summary",
+      "type": "string"
+    }
+  },
+  "required": [
+    "loop_id"
+  ],
+  "title": "LoopHeartbeat",
+  "type": "object"
+}
