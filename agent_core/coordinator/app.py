@@ -38,6 +38,14 @@ from agent_core.coordinator.db import (
 MAX_BODY_BYTES = 65_536
 MAX_CLOCK_SKEW_SECONDS = 300
 
+_APPROVAL_RANK = {"none": 0, "operator": 1, "senior": 2, "break_glass": 3}
+_MINIMUM_APPROVAL = {
+    "engineering.draft_pr": "operator",
+    "noc.network_change.prepare": "operator",
+    "knowledge.learning.proposal": "operator",
+    "soc.active_probe.rt2": "senior",
+}
+
 
 DEFAULT_REGISTRATIONS = [
     LoopRegistration(
@@ -307,6 +315,18 @@ def create_app(
         supported = capability_map.get(payload.target_loop)
         if supported is None or payload.capability not in supported:
             raise HTTPException(status_code=422, detail="target loop does not advertise capability")
+        minimum = _MINIMUM_APPROVAL.get(payload.capability, "none")
+        if (
+            payload.risk_level in {"high", "critical"}
+            and payload.capability
+            in {"engineering.draft_pr", "noc.network_change.prepare", "knowledge.learning.proposal"}
+        ):
+            minimum = "senior"
+        if _APPROVAL_RANK[payload.approval_tier] < _APPROVAL_RANK[minimum]:
+            raise HTTPException(
+                status_code=422,
+                detail=f"{payload.capability} requires at least {minimum} approval",
+            )
         if payload.expires_at and payload.expires_at <= datetime.now(UTC):
             raise HTTPException(status_code=422, detail="handoff is already expired")
         try:

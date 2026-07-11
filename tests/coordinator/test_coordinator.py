@@ -164,3 +164,31 @@ async def test_signature_covers_body(tmp_path) -> None:
                 headers={**headers, "Content-Type": "application/json"},
             )
         assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_capability_policy_cannot_be_downgraded_by_source(tmp_path) -> None:
+    app = create_app(database_url=f"sqlite+aiosqlite:///{tmp_path / 'coordinator.db'}", keys=KEYS)
+    async with app.router.lifespan_context(app):
+        soc = _client(app, "soc")
+        weak = HandoffEnvelope(
+            source_loop="soc",
+            target_loop="engineering",
+            capability="engineering.draft_pr",
+            approval_tier="none",
+            payload={"repository": "AS215932/network-operations"},
+            idempotency_key="weak-engineering-scope",
+        )
+        with pytest.raises(Exception, match="requires at least operator approval"):
+            await soc.create_handoff(weak)
+
+        weak_probe = HandoffEnvelope(
+            source_loop="soc",
+            target_loop="soc",
+            capability="soc.active_probe.rt2",
+            approval_tier="operator",
+            payload={"probe_kind": "tls_handshake"},
+            idempotency_key="weak-probe-scope",
+        )
+        with pytest.raises(Exception, match="requires at least senior approval"):
+            await soc.create_handoff(weak_probe)
