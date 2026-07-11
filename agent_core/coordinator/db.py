@@ -626,11 +626,20 @@ class CoordinatorStore:
                 event_id=event.event_id,
                 payload={
                     "event_type": "handoff_transition",
-                    "summary": event.summary or f"{row.handoff_id}: {event.event_type}",
+                    # Collector traces are structural telemetry only. The full
+                    # event remains in the coordinator audit table; never copy
+                    # caller-controlled summaries, rationale, results, or
+                    # payloads into the shared trace stream.
+                    "summary": f"{row.handoff_id}: {event.event_type}",
                     "handoff_id": row.handoff_id,
                     "case_id": row.case_id,
                     "payload": {
-                        "handoff_event": event.model_dump(mode="json"),
+                        "event_id": event.event_id,
+                        "event_type": event.event_type,
+                        "actor_loop": event.actor_loop,
+                        "from_status": event.from_status,
+                        "to_status": event.to_status,
+                        "handoff_version": event.handoff_version,
                         "source_loop": row.source_loop,
                         "target_loop": row.target_loop,
                         "capability": row.capability,

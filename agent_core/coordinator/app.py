@@ -197,17 +197,26 @@ def create_app(
     database_url: str | None = None,
     keys: dict[str, dict[str, str]] | None = None,
     allow_insecure_dev: bool | None = None,
+    environment: str | None = None,
     registrations: list[LoopRegistration] | None = None,
 ) -> FastAPI:
+    runtime_environment = (
+        environment or os.environ.get("HYRULE_COORDINATOR_ENVIRONMENT", "production")
+    ).strip().lower()
+    insecure_dev = (
+        allow_insecure_dev
+        if allow_insecure_dev is not None
+        else _truthy_env("HYRULE_COORDINATOR_ALLOW_INSECURE_DEV")
+    )
+    if insecure_dev and runtime_environment not in {"development", "test"}:
+        raise RuntimeError(
+            "HYRULE_COORDINATOR_ALLOW_INSECURE_DEV is permitted only in development/test"
+        )
     engine = make_engine(database_url)
     store = CoordinatorStore(make_sessionmaker(engine))
     authenticator = CoordinatorAuthenticator(
         keys=keys if keys is not None else _load_keys(),
-        allow_insecure_dev=(
-            allow_insecure_dev
-            if allow_insecure_dev is not None
-            else _truthy_env("HYRULE_COORDINATOR_ALLOW_INSECURE_DEV")
-        ),
+        allow_insecure_dev=insecure_dev,
     )
     approved_registrations = registrations or DEFAULT_REGISTRATIONS
     capability_map = {item.loop_id: frozenset(item.capabilities) for item in approved_registrations}

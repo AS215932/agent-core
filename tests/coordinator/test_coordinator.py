@@ -196,3 +196,41 @@ async def test_capability_policy_cannot_be_downgraded_by_source(tmp_path) -> Non
         )
         with pytest.raises(Exception, match="requires at least senior approval"):
             await soc.create_handoff(weak_probe)
+
+
+def test_insecure_auth_cannot_be_enabled_in_production(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("HYRULE_COORDINATOR_ALLOW_INSECURE_DEV", "true")
+    monkeypatch.delenv("HYRULE_COORDINATOR_ENVIRONMENT", raising=False)
+    with pytest.raises(RuntimeError, match="only in development/test"):
+        create_app(database_url=f"sqlite+aiosqlite:///{tmp_path / 'blocked.db'}")
+
+    app = create_app(
+        database_url=f"sqlite+aiosqlite:///{tmp_path / 'test.db'}",
+        environment="test",
+    )
+    assert app.state.authenticator.allow_insecure_dev is True
+
+
+@pytest.mark.asyncio
+async def test_trace_outbox_contains_only_structural_handoff_metadata(tmp_path) -> None:
+    app = create_app(
+        database_url=f"sqlite+aiosqlite:///{tmp_path / 'coordinator.db'}", keys=KEYS
+    )
+    async with app.router.lifespan_context(app):
+        soc = _client(app, "soc")
+        envelope = HandoffEnvelope(
+            source_loop="soc",
+            target_loop="knowledge",
+            capability="knowledge.context.resolve",
+            summary="authorization: bearer do-not-export",
+            payload={"query": "private raw telemetry do-not-export"},
+            idempotency_key="trace-redaction",
+        )
+        await soc.create_handoff(envelope)
+        batch = await app.state.store.outbox_batch()
+
+    encoded = json.dumps([payload for _row_id, payload in batch], sort_keys=True)
+    assert "do-not-export" not in encoded
+    assert "handoff_event" not in encoded
+    assert '"event_type": "created"' in encoded
+    assert '"source_loop": "soc"' in encoded
