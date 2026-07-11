@@ -1,10 +1,10 @@
 # agent-core
 
-Shared, dependency-light **typed contracts** for the AS215932 Agent Runtime Framework.
+Shared, dependency-light **typed contracts** and optional coordination services for
+the AS215932 Agent Runtime Framework.
 
-This is the **§31 safe milestone** (Phase 1) of the framework consolidation described in
-`../docs/migration/first-safe-milestone.md`. It introduces standard contracts **without
-changing any existing loop's behavior**:
+The base installation remains contract-only; service and HTTP dependencies are isolated
+behind extras:
 
 - `agent_core/contracts/` — pydantic v2 models (JSON-serializable, schema-versioned).
   Importing them pulls in **only pydantic** (no langgraph / pydantic-ai / db).
@@ -16,13 +16,28 @@ changing any existing loop's behavior**:
   by tests only**; not wired into any loop's runtime.
 - `agent_core/contracts/graphs/` — *descriptive* draft `GraphSpec`s of the loops' current
   LangGraph topology (no compiler yet).
+- `agent_core/coordination/` — signed LHP-v2 HTTP client used identically by SOC, NOC,
+  Engineering, Knowledge, and the Agentic Observatory.
+- `agent_core/coordinator/` — optional FastAPI/Postgres coordination service. It owns
+  handoff state, claims, immutable approvals, verification transitions, and sanitized
+  case projections; it does not own private loop state or replace the trace collector.
 
 ## Scope
 
-In: contracts, adapters (test-only), draft GraphSpecs, deterministic arbitration helper,
-tests, CI.
-Out (later phases): runtime, GraphSpec compiler, model router, tool/MCP registries,
-memory store, learning substrate, judges, policy gates, control-plane API/GUI.
+In: contracts, adapters, draft GraphSpecs, deterministic arbitration, the optional
+coordinator/client, tests, and CI. Out: a universal agent runtime, GraphSpec compiler,
+model router, tool/MCP registry, or direct production executor.
+
+## Coordinator
+
+```bash
+uv run --extra coordinator agent-core-coordinator
+```
+
+Production requires `HYRULE_COORDINATOR_DATABASE_URL` and a JSON map of per-loop key
+IDs/secrets in `HYRULE_COORDINATOR_LOOP_KEYS_JSON`. The service binds to port `8771` by
+default. Every protected request is signed with the generic `X-Agent-Loop-*` headers;
+the shared `CoordinatorClient` handles canonical encoding and signing.
 
 ## Develop
 

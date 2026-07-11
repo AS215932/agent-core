@@ -1,0 +1,121 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "actor_id": {
+      "title": "Actor Id",
+      "type": "string"
+    },
+    "actor_loop": {
+      "default": "",
+      "title": "Actor Loop",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "event_type": {
+      "enum": [
+        "created",
+        "approval_requested",
+        "approved",
+        "rejected",
+        "queued",
+        "claimed",
+        "heartbeat",
+        "progress",
+        "result_submitted",
+        "verification_pending",
+        "verified",
+        "failed",
+        "cancelled",
+        "expired"
+      ],
+      "title": "Event Type",
+      "type": "string"
+    },
+    "from_status": {
+      "anyOf": [
+        {
+          "enum": [
+            "proposed",
+            "awaiting_approval",
+            "queued",
+            "claimed",
+            "in_progress",
+            "result_submitted",
+            "verification_pending",
+            "completed",
+            "rejected",
+            "failed",
+            "cancelled",
+            "expired"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "From Status"
+    },
+    "handoff_id": {
+      "title": "Handoff Id",
+      "type": "string"
+    },
+    "handoff_version": {
+      "minimum": 1,
+      "title": "Handoff Version",
+      "type": "integer"
+    },
+    "payload": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "summary": {
+      "default": "",
+      "maxLength": 1000,
+      "title": "Summary",
+      "type": "string"
+    },
+    "to_status": {
+      "enum": [
+        "proposed",
+        "awaiting_approval",
+        "queued",
+        "claimed",
+        "in_progress",
+        "result_submitted",
+        "verification_pending",
+        "completed",
+        "rejected",
+        "failed",
+        "cancelled",
+        "expired"
+      ],
+      "title": "To Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "handoff_id",
+    "event_type",
+    "actor_id",
+    "to_status",
+    "handoff_version"
+  ],
+  "title": "HandoffEvent",
+  "type": "object"
+}
