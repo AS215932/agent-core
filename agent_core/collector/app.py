@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import os
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Iterable
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from importlib.metadata import PackageNotFoundError, version
@@ -97,6 +97,12 @@ _SEVERITIES = {"critical", "high", "medium", "low", "info", "unknown"}
 # retention window because the durable copies live in the knowledge repo ledger.
 _INSIGHT_EVENT_TYPES = ("loop_decision_envelope", "insight_label")
 INGEST_TOKEN_ENV = "HYRULE_COLLECTOR_INGEST_TOKEN"
+# Only operator-authored writes are guarded by the ingest token. Ordinary trace
+# and loop-decision (insight record) events come from network-isolated internal
+# producers that do not carry a bearer; requiring one would 401 them — and the
+# HTTP sink swallows that error, so the insight stream would go silently empty.
+# Labels influence gate relaxation, so they are the write worth authenticating.
+_TOKEN_GUARDED_EVENT_TYPES = frozenset({"insight_label"})
 INSIGHT_RETENTION_ENV = "HYRULE_COLLECTOR_INSIGHT_RETENTION_DAYS"
 DEFAULT_INSIGHT_RETENTION_DAYS = 180
 _PRUNE_INTERVAL_SECONDS = 24 * 3600
@@ -112,6 +118,12 @@ def _require_ingest_token(authorization: str | None) -> None:
         provided = authorization[len("bearer ") :].strip()
     if provided != expected:
         raise HTTPException(status_code=401, detail="invalid or missing ingest token")
+
+
+def _require_token_if_guarded(events: Iterable[TraceEvent], authorization: str | None) -> None:
+    """Enforce the ingest token only when a guarded (label) event is present."""
+    if any(event.event_type in _TOKEN_GUARDED_EVENT_TYPES for event in events):
+        _require_ingest_token(authorization)
 
 
 def _insight_retention_days() -> int:
@@ -381,7 +393,7 @@ def create_app(database_url: str | None = None) -> FastAPI:
     async def ingest(
         event: TraceEvent, authorization: str | None = Header(default=None)
     ) -> dict[str, str]:
-        _require_ingest_token(authorization)
+        _require_token_if_guarded((event,), authorization)
         async with sessionmaker() as session:
             session.add(_row_from_event(event))
             await session.commit()
@@ -391,7 +403,7 @@ def create_app(database_url: str | None = None) -> FastAPI:
     async def ingest_batch(
         events: list[TraceEvent], authorization: str | None = Header(default=None)
     ) -> dict[str, int]:
-        _require_ingest_token(authorization)
+        _require_token_if_guarded(events, authorization)
         async with sessionmaker() as session:
             session.add_all([_row_from_event(event) for event in events])
             await session.commit()

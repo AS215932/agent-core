@@ -97,29 +97,45 @@ def test_insights_endpoint_returns_decisions_and_labels(tmp_path) -> None:
         assert client.get("/v1/insights", params={"since": "not-a-date"}).status_code == 422
 
 
-def test_ingest_token_enforced_when_configured(tmp_path, monkeypatch) -> None:
+def test_ingest_token_enforced_only_for_label_writes(tmp_path, monkeypatch) -> None:
+    # The token guards operator label writes; trace + insight-record events from
+    # the network-isolated internal producers stay open so a configured token
+    # cannot silently starve the insight stream.
     monkeypatch.setenv("HYRULE_COLLECTOR_INGEST_TOKEN", "sekrit")
     with TestClient(_app(tmp_path)) as client:
-        event = _envelope_event("ins_noc_1")
-        assert client.post("/v1/trace", json=event).status_code == 401
+        record = _envelope_event("ins_noc_1")
+        label = _label_event("lbl_1", "ins_noc_1")
+
+        # trace / loop-decision events: open even with a token configured
+        assert client.post("/v1/trace", json=record).status_code == 200
+        assert client.post("/v1/trace/batch", json=[record]).status_code == 200
+
+        # label writes: token required
+        assert client.post("/v1/trace", json=label).status_code == 401
         assert (
             client.post(
-                "/v1/trace", json=event, headers={"Authorization": "Bearer wrong"}
+                "/v1/trace", json=label, headers={"Authorization": "Bearer wrong"}
             ).status_code
             == 401
         )
         assert (
             client.post(
-                "/v1/trace", json=event, headers={"Authorization": "Bearer sekrit"}
+                "/v1/trace", json=label, headers={"Authorization": "Bearer sekrit"}
             ).status_code
             == 200
         )
+
+        # a batch containing any label is guarded as a whole
+        assert client.post("/v1/trace/batch", json=[record, label]).status_code == 401
         assert (
             client.post(
-                "/v1/trace/batch", json=[event], headers={"Authorization": "Bearer sekrit"}
+                "/v1/trace/batch",
+                json=[record, label],
+                headers={"Authorization": "Bearer sekrit"},
             ).status_code
             == 200
         )
+
         # reads stay open
         assert client.get("/v1/insights").status_code == 200
 
@@ -128,6 +144,8 @@ def test_ingest_token_not_required_by_default(tmp_path, monkeypatch) -> None:
     monkeypatch.delenv("HYRULE_COLLECTOR_INGEST_TOKEN", raising=False)
     with TestClient(_app(tmp_path)) as client:
         assert client.post("/v1/trace", json=_envelope_event("ins_noc_1")).status_code == 200
+        # labels also unauthenticated when no token is configured
+        assert client.post("/v1/trace", json=_label_event("lbl_1", "ins_noc_1")).status_code == 200
 
 
 def test_startup_prunes_old_insight_rows_only(tmp_path, monkeypatch) -> None:
