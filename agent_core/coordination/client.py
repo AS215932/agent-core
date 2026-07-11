@@ -118,6 +118,11 @@ class CoordinatorClient:
         data = await self._request("GET", "/v1/cases", params=filters)
         return [CaseProjection.model_validate(item) for item in data.get("cases", [])]
 
+    async def case(self, case_id: str) -> CaseProjection:
+        return CaseProjection.model_validate(
+            await self._request("GET", f"/v1/cases/{case_id}")
+        )
+
     async def create_handoff(self, envelope: HandoffEnvelope) -> HandoffRecord:
         return HandoffRecord.model_validate(
             await self._request("POST", "/v1/handoffs", payload=envelope)
@@ -127,6 +132,14 @@ class CoordinatorClient:
         return HandoffRecord.model_validate(
             await self._request("GET", f"/v1/handoffs/{handoff_id}")
         )
+
+    async def handoffs(self, **filters: Any) -> list[HandoffRecord]:
+        data = await self._request("GET", "/v1/handoffs", params=filters)
+        return [HandoffRecord.model_validate(item) for item in data.get("handoffs", [])]
+
+    async def handoff_events(self, handoff_id: str) -> list[dict[str, Any]]:
+        data = await self._request("GET", f"/v1/handoffs/{handoff_id}/events")
+        return list(data.get("events", []))
 
     async def inbox(self, *, status: str | None = None, limit: int = 100) -> list[HandoffRecord]:
         params: dict[str, Any] = {"limit": limit}

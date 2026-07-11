@@ -40,6 +40,7 @@ async def test_full_handoff_lifecycle_and_case_projection(tmp_path) -> None:
     async with app.router.lifespan_context(app):
         soc = _client(app, "soc")
         knowledge = _client(app, "knowledge")
+        observatory = _client(app, "observatory")
 
         projection = await soc.put_case(
             CaseProjection(
@@ -51,6 +52,7 @@ async def test_full_handoff_lifecycle_and_case_projection(tmp_path) -> None:
         )
         assert projection.owner_loop == "soc"
         assert (await knowledge.cases(owner_loop="soc"))[0].case_id == "soc_case_1"
+        assert (await observatory.case("soc_case_1")).title == "Posture drift"
 
         envelope = HandoffEnvelope(
             source_loop="soc",
@@ -63,6 +65,8 @@ async def test_full_handoff_lifecycle_and_case_projection(tmp_path) -> None:
         )
         created = await soc.create_handoff(envelope)
         assert created.status == "queued"
+        assert (await observatory.handoffs(case_id="soc_case_1"))[0].status == "queued"
+        assert (await observatory.handoff_events(envelope.handoff_id))[0]["event_type"] == "created"
 
         duplicate = await soc.create_handoff(envelope)
         assert duplicate.envelope.handoff_id == created.envelope.handoff_id
