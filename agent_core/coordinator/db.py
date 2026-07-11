@@ -411,6 +411,12 @@ class CoordinatorStore:
             lease_expired = aware_lease is not None and aware_lease <= now
             if row.status not in {"queued", "claimed", "in_progress"}:
                 raise ValueError("handoff is not claimable")
+            if row.approval:
+                approval = ApprovalRecord.model_validate(row.approval)
+                if approval.scope_hash != row.scope_hash:
+                    raise ValueError("stored approval no longer matches handoff scope")
+                if approval.expires_at and approval.expires_at <= now:
+                    raise ValueError("handoff approval has expired")
             if row.status != "queued" and not lease_expired and row.claim_owner != actor_loop:
                 raise ValueError("handoff is leased by another worker")
             previous = row.status
