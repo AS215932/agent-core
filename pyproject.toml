@@ -10,16 +10,16 @@ requires-python = ">=3.11"
 dependencies = ["pydantic>=2,<3"]
 
 [project.optional-dependencies]
-collector = ["fastapi>=0.110", "uvicorn>=0.29", "sqlalchemy>=2", "asyncpg>=0.29"]
+collector = ["fastapi>=0.110", "uvicorn>=0.29", "sqlalchemy[asyncio]>=2", "asyncpg>=0.29"]
 dev = [
     "pytest>=8", "pyyaml>=6", "ruff>=0.5", "mypy>=1.8", "types-PyYAML",
-    "fastapi>=0.110", "uvicorn>=0.29", "sqlalchemy>=2", "httpx>=0.27", "aiosqlite>=0.20",
+    "fastapi>=0.110", "uvicorn>=0.29", "sqlalchemy[asyncio]>=2", "httpx>=0.27", "aiosqlite>=0.20",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=8", "pyyaml>=6", "ruff>=0.5", "mypy>=1.8", "types-PyYAML",
-    "fastapi>=0.110", "uvicorn>=0.29", "sqlalchemy>=2", "httpx>=0.27", "aiosqlite>=0.20",
+    "fastapi>=0.110", "uvicorn>=0.29", "sqlalchemy[asyncio]>=2", "httpx>=0.27", "aiosqlite>=0.20",
 ]
 
 [tool.hatch.build.targets.wheel]
